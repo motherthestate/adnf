@@ -1,0 +1,40 @@
+{
+  "name": "adnf",
+  "version": "0.0.1",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/adnf.umd.cjs",
+  "module": "./dist/adnf.js",
+  "browser": "./dist/adnf.cjs.js",
+  "types": "./dist/adnf.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/adnf.js",
+      "require": "./dist/adnf.cjs.js",
+      "umd": "./dist/adnf.umd.js"
+    }
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/eslint": "^8.44.2",
+    "@types/node": "^20.5.1",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "autoprefixer": "^10.4.15",
+    "delay": "^6.0.0",
+    "eslint": "^8.45.0",
+    "postcss": "^8.4.28",
+    "typescript": "^5.2.2",
+    "vite": "^4.4.5",
+    "vite-plugin-dts": "^3.5.2",
+    "vite-plugin-resolve": "^2.4.1"
+  }
+}

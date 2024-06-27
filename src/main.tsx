@@ -1,1 +1,3 @@
-console.log('first')
+import { fetch } from '../lib'
+
+const api = fetch

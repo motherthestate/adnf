@@ -1,5 +1,5 @@
-import { Fetch } from "../types"
-import { withOptions } from "./withOptions"
+import { Fetch } from '../types'
+import { withOptions } from './withOptions'
 
 /**
  * withMethods
@@ -8,16 +8,14 @@ import { withOptions } from "./withOptions"
 export const withMethods = <F extends Fetch>(fetch: F) => {
   const method = (method: string) => withOptions(fetch, { method })
 
-  const get = method("get")
-
-  return Object.assign(get, {
-    get,
+  return {
     method,
-    head: method("head"),
-    post: method("post"),
-    put: method("put"),
-    delete: method("delete"),
-    del: method("delete"),
-    patch: method("patch"),
-  })
+    get: method('get'),
+    head: method('head'),
+    post: method('post'),
+    put: method('put'),
+    delete: method('delete'),
+    del: method('delete'),
+    patch: method('patch'),
+  }
 }

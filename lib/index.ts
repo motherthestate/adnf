@@ -2,16 +2,16 @@
  * Fetchers
  */
 
-export { resultFetch as fetch } from './fetchers/fetch'
+export { resultFetch, resultFetch as fetch } from './fetchers/resultFetch'
 export { debugFetch } from './fetchers/debugFetch'
 
 /**
  * Makers
  */
 
-export { withCreate } from './makers/withCreate'
+export { withFetch } from './makers/withFetch'
 export { withOptions } from './makers/withOptions'
-export { withResource, withBase } from './makers/withBase'
+export { withResource, withBase } from './makers/withResource'
 export { withMethods } from './makers/withMethods'
 
 export { createAbortGroup } from './utils/createAbortGroup'

@@ -4,7 +4,7 @@
 - [🐕 ADNF](#-adnf)
    * [Overview](#overview)
    * [The FetchResult](#the-fetchresult)
-   * [Extending a fetch](#extending-a-fetch)
+   * [Extend your fetchers](#extend-your-fetchers)
    * [Reference](#reference)
       + [Fetchers](#fetchers)
          - [`fetch`](#fetch)
@@ -64,7 +64,7 @@ if (result.failed) {
 }
 ```
 
-## Extending a fetch
+## Extend your fetchers
 
 You can use the maker function `withOptions`, `withResource`, `withBase` and `withFetch` to extend a fetch.
 
@@ -84,10 +84,6 @@ const auth = withMethods(authFetch)
 
 await auth.get("/me")
 ```
-
-
-
-
 
 ## Reference
 

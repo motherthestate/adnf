@@ -114,12 +114,11 @@ const auth = withOptions(
   noCacheFetch,
   (options) => ({ headers: { Authorization: localStorage.get("token") } })
 )
-
 ```
 
 #### `withFetch`
 
-Makes a fetch *dependent*. Generally prefer using `withResource` and `withOptions`. Used internally to implement other makers.
+Makes a fetch *dependent*. Generally prefer using `withResource` and `withOptions`. Used internally to implement other makers. Read more about [fetch dependency below](#fetch-dependency).
 
 ```tsx
 const newFetch = withFetch(
@@ -128,5 +127,50 @@ const newFetch = withFetch(
 )
 ```
 
-#### `unwrap`
-#### `swr`
+#### `unwrap` and `swr`
+
+If you’re working with a library that expects errors to be thrown i.e. [SWR](https://swr.vercel.app/docs/error-handling), use unwrap. Unwrapping fetch does not restore the Fetch API 1:1, primarily differences in behavior due to ResultFetch’s strict option.
+
+```tsx
+import { fetch as resultFetch, unwrap } from "adnf"
+
+const fetch = unwrap(resultFetch)
+
+const result = await = resultFetch<User>("/me") // FetchResult<User, unkown>
+const user = await = fetch<User>("/me") // User
+```
+
+#### `createAbortGroup*`
+
+Creates a grouped abort controller.
+
+```tsx
+import { createAbortGroup } from "adnf"
+
+const group = createAbortGroup()
+
+// use abortPrevious for grouped fetched before fetch
+fetch.post("/upload", { abortPrevious: true, group }) // Err
+fetch.post("/upload", { abortPrevious: true, group }) // Err
+fetch.post("/upload", { abortPrevious: true, group }) // Success
+
+// or manually
+group.cancel()
+```
+
+### Resource
+
+#### Fetch dependency
+
+Dependent fetches follow other fetches. Maker functions return a special fetch that keeps track of that sequence. Your initial fetch is passed first during the declaration but last when fetching.
+
+When using `withFetch`the fetch provided in the creator the the **next** fetch. This is necessary to implement the extend like behavior makers like `withOptions`.
+
+```tsx
+const a = withFetch(fetch, (b) => b)
+const b = withFetch(fetch, (c) => c)
+const c = withFetch(b, (fetch) => fetch)
+
+b() // will first call fetch creator a and then b.
+```
+

@@ -1,6 +1,22 @@
 # 🐕 ADNF
 **A Dog Named Fetch** - A strict, tiny typescript fetch wrapper.
 
+- [🐕 ADNF](#-adnf)
+   * [Overview](#overview)
+   * [The FetchResult](#the-fetchresult)
+   * [Reference](#reference)
+      + [Fetchers](#fetchers)
+         - [`fetch`](#fetch)
+      + [Makers](#makers)
+         - [`withMethods`](#withmethods)
+         - [`withResource` & `withBase`](#withresource-withbase)
+         - [`withOptions`](#withoptions)
+         - [`withFetch`](#withfetch)
+         - [`unwrap` and `swr`](#unwrap-and-swr)
+         - [`createAbortGroup*`](#createabortgroup)
+      + [Resources](#resource)
+         - [Fetch dependency](#fetch-dependency)
+
 ## Overview
 
 ```tsx
@@ -46,6 +62,31 @@ if (result.failed) {
   result // Err
 }
 ```
+
+## Extending a fetch
+
+You can use the maker function `withOptions`, `withResource`, `withBase` and `withFetch` to extend a fetch.
+
+```tsx
+import { fetch, withBase } from "adnf"
+
+// base fetch config
+const baseFetch = withOptions(fetch, { cache: "no-cache" })
+const apiFetch = withBase(baseFetch, "/api")
+const authFetch = withOptions(
+  apiFetch,
+  (options) => ({ headers: { Authorization: localStorage.get("token") } })
+)
+
+// Use `withMethods` to extend your fetch with http methods
+const auth = withMethods(authFetch)
+
+await auth.get("/me")
+```
+
+
+
+
 
 ## Reference
 
@@ -158,7 +199,7 @@ fetch.post("/upload", { abortPrevious: true, group }) // Success
 group.cancel()
 ```
 
-### Resource
+### Resources
 
 #### Fetch dependency
 

@@ -4,7 +4,7 @@
 - [🐕 ADNF](#-adnf)
    * [Overview](#overview)
    * [The FetchResult](#the-fetchresult)
-   * [Extend your fetchers](#extend-your-fetchers)
+   * [Extend fetchers](#extend-fetchers)
    * [Reference](#reference)
       + [Fetchers](#fetchers)
          - [`fetch`](#fetch)
@@ -64,7 +64,7 @@ if (result.failed) {
 }
 ```
 
-## Extend your fetchers
+## Extend fetchers
 
 You can use the maker function `withOptions`, `withResource`, `withBase` and `withFetch` to extend a fetch.
 

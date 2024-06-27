@@ -4,6 +4,7 @@
 - [🐕 ADNF](#-adnf)
    * [Overview](#overview)
    * [The FetchResult](#the-fetchresult)
+   * [Extending a fetch](#extending-a-fetch)
    * [Reference](#reference)
       + [Fetchers](#fetchers)
          - [`fetch`](#fetch)
@@ -14,7 +15,7 @@
          - [`withFetch`](#withfetch)
          - [`unwrap` and `swr`](#unwrap-and-swr)
          - [`createAbortGroup*`](#createabortgroup)
-      + [Resources](#resource)
+      + [Resources](#resources)
          - [Fetch dependency](#fetch-dependency)
 
 ## Overview

@@ -38,7 +38,7 @@ if (result.success) {
 
 ## The FetchResult
 
-The `fetch` function has 3 distinct result types. The `FetchResult<V, E>` type describes all three result types:
+The `fetch` function has 3 result types. The `FetchResult<V, E>` type describes all three result types:
 
 - `Success<V>`: Fetch was successful
 - `ErrResponse<E>`: Fetch returned response but with error status code
@@ -73,7 +73,7 @@ if (result.failed) {
 
 ## Extend fetchers
 
-You can use the maker function `withOptions`, `withResource`, `withBase` and `withFetch` to extend a fetch.
+You can use the maker functions `withOptions`, `withResource`, `withBase` and `withFetch` to sequentially extend a fetch.
 
 ```tsx
 import { fetch, withBase } from 'adnf'
@@ -175,7 +175,7 @@ const auth = withOptions(noCacheFetch, options => ({
 
 #### `withDeclarations`
 
-Helps with prepared fetches. Describe a fetch to run later. Additionally a fetch key is generated to identify requests.
+Declares fetches instead of running them immediately. Helps with prepared fetches, creating services and generating an identifier hash `key`.
 
 ```tsx
 const declare = withDeclarations(fetch)
@@ -184,13 +184,13 @@ const fetchUser = id => declare('/user', { params: { id } })
 
 const declaration = fetchUser('a')
 
-declaration.key // "/user?id='a'"
+declaration.key // "@"/user",#params:#id:"a",,,"
 declaration.fetch() // run fetch as usual
 ```
 
 #### `withFetch`
 
-Makes a fetch _dependent_. Generally prefer using `withResource` and `withOptions`. Used internally to implement other makers. Read more about [fetch dependency below](#fetch-dependency).
+Create fetch creators that run sequentially when initiating a fetch. Used to create a fetch that is _dependent_ on the next fetch. Used internally to implement other makers. Read more about [fetch dependency below](#fetch-dependency).
 
 ```tsx
 const newFetch = withFetch(fetch, fetch => (resource, options) => fetch(resource, { ...options }))
@@ -267,19 +267,7 @@ const loggedFetch = useFetch(fetch, fetch => (resource, options) => {
 
 #### Fetch dependency
 
-Dependent fetches follow other fetches. Maker functions return a special fetch that maintains a specific order.
-
-When using `withFetch` the fetch provided in the creator is the **next** fetch. This is necessary to implement the extend like behavior makers like `withOptions`.
-
-```tsx
-const a = withFetch(fetch, b => b)
-const b = withFetch(fetch, c => c)
-const c = withFetch(b, fetch => fetch)
-
-b() // will first call fetch creator a and then b.
-```
-
-Another example, the fetch returned from your creator is "cached" and are run in sequence.
+Dependent fetches follow other fetches. Maker functions return a special fetch that maintains a specific order. When using `withFetch` the fetch provided in the creator is the **next** fetch. Your fetch creators are made "dependent" and run in sequence once you have initiated a fetch.
 
 ```tsx
 const a = withFetch(fetch, fetch => {

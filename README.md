@@ -16,7 +16,7 @@
       - [`🐛 withDeclarations`](#withdeclarations)
       - [`withFetch`](#withfetch)
       - [`unwrap` and `swr`](#unwrap-and-swr)
-      - [`createAbortGroup*`](#createabortgroup)
+      - [`createAbortGroup`](#createabortgroup)
     - [Resources](#resources)
       - [Fetch dependency](#fetch-dependency)
 

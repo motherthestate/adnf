@@ -138,7 +138,7 @@ export const resultFetch: ResultFetch = async (resource, options) => {
       const contentTypeSupportsJSON = contentType?.includes('application/json')
 
       if (strict && !contentTypeSupportsJSON) {
-        return makeResultErrResponse(
+        return ResultErrResponse(
           response,
           null,
           'Fetch response not json in: fetch(..., { strict: true })'
@@ -153,39 +153,39 @@ export const resultFetch: ResultFetch = async (resource, options) => {
       const resultData = contentTypeSupportsJSON ? parse(resultText) : resultText
 
       if (responseOk) {
-        return makeResultSuccess(response, resultData)
+        return ResultSuccess(response, resultData)
       }
 
       const errorType = resultData
 
       if (strict && !errorType) {
-        return makeResultErrResponse(
+        return ResultErrResponse(
           response,
           null,
           'Fetch response error nullable in: fetch(..., { strict: true })'
         )
       }
 
-      return makeResultErrResponse(response, errorType)
+      return ResultErrResponse(response, errorType)
     } catch (err) {
       // No fetch response error
       const abortDueToTimeout =
         abortController.signal.aborted && abortController.signal.reason === TimeoutReason
 
-      return makeResultErr(err as string, {
+      return ResultErr(err as string, {
         aborted: abortController.signal.aborted,
         timeout: abortDueToTimeout,
       })
     }
   } catch (err) {
-    return makeResultErr(err as string, {
+    return ResultErr(err as string, {
       aborted: false,
       timeout: false,
     })
   }
 }
 
-const makeResultSuccess = <V = unknown>(response: Response, value: V): FetchSuccess<V> => {
+const ResultSuccess = <V = unknown>(response: Response, value: V): FetchSuccess<V> => {
   return Object.assign(Result(value), {
     aborted: false,
     timeout: false,
@@ -193,7 +193,7 @@ const makeResultSuccess = <V = unknown>(response: Response, value: V): FetchSucc
   } as const)
 }
 
-const makeResultErrResponse = <E = unknown>(
+const ResultErrResponse = <E = unknown>(
   response: Response,
   type: E,
   message?: string,
@@ -207,7 +207,7 @@ const makeResultErrResponse = <E = unknown>(
   } as const)
 }
 
-const makeResultErr = (message: string, props: Partial<FetchErr> = {}): FetchErr => {
+export const ResultErr = (message: string, props: Partial<FetchErr> = {}): FetchErr => {
   return Object.assign(Result.Err(null, message), {
     aborted: false,
     timeout: false,

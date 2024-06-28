@@ -2,7 +2,7 @@
  * Fetchers
  */
 
-export { resultFetch, resultFetch as fetch } from './fetchers/resultFetch'
+export { resultFetch, resultFetch as fetch, ResultErr } from './fetchers/resultFetch'
 export { debugFetch } from './fetchers/debugFetch'
 
 /**

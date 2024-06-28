@@ -166,7 +166,7 @@ const fetchUser = (id) => declare("/user", { params: { id } })
 
 const declaration = fetchUser("a")
 
-declaration.key // "@"/test",#params:#id:"a",,,"
+declaration.key // "@"/user",#params:#id:"a",,,"
 declaration.fetch() // run fetch as usual
 ```
 

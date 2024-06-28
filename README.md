@@ -152,6 +152,21 @@ const auth = withOptions(noCacheFetch, options => ({
 }))
 ```
 
+#### `withDeclarations`
+
+Helps with prepared fetches. Describe a fetch to run later. Additionally a fetch key is generated to identify requests.
+
+```tsx
+const declare = withDeclarations(fetch)
+
+const fetchUser = (id) => declare("/user", { params: { id } })
+
+const declaration = fetchUser("a")
+
+declaration.key // "/user?id='a'"
+declaration.fetch() // run fetch as usual
+```
+
 #### `withFetch`
 
 Makes a fetch _dependent_. Generally prefer using `withResource` and `withOptions`. Used internally to implement other makers. Read more about [fetch dependency below](#fetch-dependency).

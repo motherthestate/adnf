@@ -172,7 +172,7 @@ declaration.fetch() // run fetch as usual
 
 #### `withFetch`
 
-Makes a fetch _dependent_. Generally prefer using `withResource` and `withOptions`. Used internally to implement other makers. Read more about [fetch dependency below](#fetch-dependency).
+Create a fetch creator that runs in-order when used. Used to create a fetch that is _dependent_ on the next fetch. Used internally to implement other makers. Read more about [fetch dependency below](#fetch-dependency).
 
 ```tsx
 const newFetch = withFetch(fetch, fetch => (resource, options) => fetch(resource, { ...options }))

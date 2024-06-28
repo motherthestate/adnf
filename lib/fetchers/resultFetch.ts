@@ -189,6 +189,7 @@ const ResultSuccess = <V = unknown>(response: Response, value: V): FetchSuccess<
   return Object.assign(Result(value), {
     aborted: false,
     timeout: false,
+    resolved: true,
     response,
   } as const)
 }
@@ -202,6 +203,7 @@ const ResultErrResponse = <E = unknown>(
   return Object.assign(Result.Err(type, message), {
     aborted: false,
     timeout: false,
+    resolved: true,
     ...props,
     response,
   } as const)
@@ -211,9 +213,10 @@ export const ResultErr = (message: string, props: Partial<FetchErr> = {}): Fetch
   return Object.assign(Result.Err(null, message), {
     aborted: false,
     timeout: false,
+    resolved: false,
     ...props,
     response: undefined,
-  })
+  } as const)
 }
 
 /**

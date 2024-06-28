@@ -17,10 +17,10 @@
       - [`withFetch`](#withfetch)
       - [`unwrap` and `swr`](#unwrap-and-swr)
       - [`createAbortGroup`](#createabortgroup)
+    - [Recipes](#recipes)
     - [Resources](#resources)
       - [Fetch dependency](#fetch-dependency)
       - [ADNF + SWR](#adnf-+-swr)
-
 
 ## Overview
 
@@ -94,6 +94,8 @@ await auth.get('/me')
 
 #### `fetch`
 
+The `ResultFetch`
+
 ```tsx
 import { fetch } from "adnf"
 
@@ -102,16 +104,25 @@ fetch(
   options: RequestInit & {
     fetch // fetch implementation, default: window.fetch
     strict: boolean // default: true
+    timeout: number // timeout in ms. returns "Err" with timeout set to true
     group: AbortControllerGroup
-    abortPrevious: boolean
-    data: object
+    abortPrevious: boolean // aborts all previous fetches in provided AbortControllerGroup
+    data: object // json body data
+    params: Record<string, any> // search params
     form: FormData | FormDataRecord
     files: FormDataRecord
-    params: Record<string, any>
-    unwrap: boolean
-    timeout: number
   }
 )
+```
+
+#### `debugFetch`
+
+A fetch function that logs fetches. Does not perform the fetch.
+
+```tsx
+import { debugFetch } from 'adnf'
+
+debugFetch('/user') // logs fetch to console
 ```
 
 ### Makers
@@ -162,9 +173,9 @@ Helps with prepared fetches. Describe a fetch to run later. Additionally a fetch
 ```tsx
 const declare = withDeclarations(fetch)
 
-const fetchUser = (id) => declare("/user", { params: { id } })
+const fetchUser = id => declare('/user', { params: { id } })
 
-const declaration = fetchUser("a")
+const declaration = fetchUser('a')
 
 declaration.key // "/user?id='a'"
 declaration.fetch() // run fetch as usual
@@ -207,6 +218,42 @@ fetch.post('/upload', { abortPrevious: true, group }) // Success
 
 // or manually
 group.cancel()
+```
+
+### Recipes
+
+#### Last wins and First wins
+
+```tsx
+import { fetch, createAbortGroup, ResultErr } from 'adnf'
+
+// LWW
+const group = createAbortGroup()
+
+fetch('/a', { group, abortPrevious: true }) // Err
+fetch('/b', { group, abortPrevious: true }) // Success | ErrResponse
+
+// FWW
+const group = createAbortGroup()
+
+const patientFetch = resource => {
+  if (group.controllers.length) return ResultErr({ aborted: true })
+  group.fetch(resource, { group })
+}
+
+patientFetch('/a') // will resolve
+patientFetch('/b') // will not resolve if "/a" fetch did not finish
+```
+
+#### Fetch logger
+
+```tsx
+import { fetch, useFetch } from 'adnf'
+
+const loggedFetch = useFetch(fetch, fetch => (resource, options) => {
+  console.log(options.method ?? 'get', resource, options)
+  return fetch(resource, options)
+})
 ```
 
 ### Resources
@@ -264,4 +311,3 @@ c()
 #### ADNF + SWR
 
 [See repo resources](https://github.com/weltmx/adnf/blob/main/resources/use-with-swr.md)
-

@@ -22,7 +22,7 @@ export const withDeclarations: DeclareFetch = fetch => {
 }
 
 const hashFetch = (resource: string, options?: FetchOptions): string => {
-  const resourceWithParams = [resource, options?.params ?? {}]
+  const resourceWithParams = [resource, { params: options?.params ?? {} }]
   const key = stableHash(resourceWithParams)
 
   return key

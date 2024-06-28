@@ -18,12 +18,19 @@ export type FetchSuccess<V = unknown> = Success<V> & {
   aborted: false
   timeout: false
   response: Response
+  resolved: true
 }
-export type FetchErr = Err<null> & { aborted: boolean; timeout: boolean; response: undefined }
+export type FetchErr = Err<null> & {
+  aborted: boolean
+  timeout: boolean
+  response: undefined
+  resolved: false
+}
 export type FetchErrResponse<ErrType = unknown> = Err<ErrType | null> & {
   aborted: false
   timeout: false
   response: Response
+  resolved: true
 }
 
 export type FetchResult<V = unknown, E = unknown> = FetchSuccess<V> | FetchErrResponse<E> | FetchErr

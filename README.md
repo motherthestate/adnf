@@ -19,6 +19,8 @@
       - [`createAbortGroup`](#createabortgroup)
     - [Resources](#resources)
       - [Fetch dependency](#fetch-dependency)
+      - [ADNF + SWR](#adnf-+-swr)
+
 
 ## Overview
 
@@ -258,3 +260,8 @@ c()
 // fetch: b
 // fetch: c
 ```
+
+#### ADNF + SWR
+
+[See repo resources](https://github.com/weltmx/adnf/blob/main/resources/use-with-swr.md)
+

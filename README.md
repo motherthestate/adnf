@@ -47,9 +47,12 @@ The `fetch` function has 3 distinct result types. The `FetchResult<V, E>` type d
 Additionally `FetchResult` extends a rust inspired `Result` wrapper proving a useful API.
 
 ```tsx
-const result = await fetch<Flower | null, 'KNOWN_ERROR'>('/flower') // FetchResult<Flower[], never>
+const result = await fetch<Flower | null, 'NoFlower'>('/flower') // FetchResult<Flower[], "NoFlower">
 
-result.error // "KNOWN_ERROR" | null | undefined
+result.error // "NoFlower" | null | undefined
+result.aborted // fetch was aborted
+result.timeout // fetch was aborted due to a timeout
+result.resolved // fetch was able to resolve to a request
 
 // Unwrap your value:
 result.unwrap() // (throws Error) | Flower | null
@@ -94,12 +97,13 @@ await auth.get('/me')
 
 #### `fetch`
 
-The `ResultFetch`
+The `ResultFetch` returning a `FetchResult`
 
 ```tsx
 import { fetch } from "adnf"
 
-fetch(
+// ResultFetch
+const result = fetch(
   resource: string,
   options: RequestInit & {
     fetch // fetch implementation, default: window.fetch
@@ -113,6 +117,9 @@ fetch(
     files: FormDataRecord
   }
 )
+
+
+result satisfies FetchResult
 ```
 
 #### `debugFetch`

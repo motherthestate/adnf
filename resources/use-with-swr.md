@@ -1,21 +1,27 @@
 # ADNF + SWR
 
 ```tsx
-import useSWR as useDefaultSWR from 'swr'
-import { fetch as resultFetch, swr } from 'adnf'
+import useDefaultSWR, { SWRConfiguration } from 'swr'
+import { FetchDeclaration, SWRError, fetch, swr, withDeclarations } from 'adnf'
 
-const fetch = swr(resultFetch)
+const declareFetch = withDeclarations(swr(fetch))
 
-fetch.get('/api/user', { params: { id: "test" }})
-// FetchDeclaration: { key: ["/api/user?id=test"], fetch }
-
-const useSWR = ({ key, fetch }, options) => {
-  return useDefaultSWR(key, fetch, { suspense: true, ...options })
+const useSWR = <V, E>({ key, fetch }: FetchDeclaration<V, E>, config?: SWRConfiguration) => {
+  return useDefaultSWR<V, SWRError<E>>(key, fetch, config)
 }
 
-const Profile = props => {
-  const user = useSWR(fetch.get<User>('/api/user', { params: { id: props.id } }), {
-    refreshInterval: 1000,
-  })
+const userById = (id: string) =>
+  declareFetch<{ id: string; name: string }, 'Errr'>('/user', { params: { id } })
+
+const UserProfile = (props: { id: string }) => {
+  const { isLoading, data: user, error } = useSWR(userById(props.id))
+
+  if (isLoading) return 'Loading ...'
+  if (error || !user) {
+    if (error.status === 401) return 'Unauthorized'
+    return 'Something went wrong'
+  }
+
+  return user.id
 }
 ```

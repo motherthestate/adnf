@@ -1,31 +1,26 @@
-import useDefaultSWR, { SWRConfiguration } from 'swr'
-import { FetchDeclaration, SWRError, debugFetch as fetch, swr, withDeclarations } from '../lib'
+// import useDefaultSWR, { SWRConfiguration } from 'swr'
+// import {
+//   FetchDeclaration,
+//   SWRError,
+//   debugFetch as fetch,
+//   swr,
+//   withBase,
+//   withDeclarations,
+//   withOptions,
+// } from '../lib'
 
-const test = swr(fetch)
+// const baseFetch = withBase(fetch, '/api')
+// const configuredFetch = withOptions(baseFetch, { strict: true, cache: 'default' })
 
-const declare = withDeclarations(swr(fetch))
+// const declareFetch = withDeclarations(swr(configuredFetch))
 
-const useSWR = <V, E>({ key, fetch }: FetchDeclaration<V, E>, options?: SWRConfiguration) => {
-  return useDefaultSWR<V, SWRError<E>>(key, fetch, options)
-}
+// const useSWR = <V, E>({ key, fetch }: FetchDeclaration<V, E>, config?: SWRConfiguration) => {
+//   return useDefaultSWR<V, SWRError<E>>(key, fetch, config)
+// }
 
-const Profile = (props: { id: string }) => {
-  const test = declare<{ id: string; name: string }, 'Errr'>('/user', { params: { id: props.id } })
+// const userById = (id: string) =>
+//   declareFetch<{ id: string; name: string }, 'Errr'>('/user', { params: { id } })
 
-  const {
-    isLoading,
-    data: user,
-    error,
-  } = useSWR(declare<{ id: string; name: string }, 'Errr'>('/user', { params: { id: props.id } }))
-
-  if (isLoading) {
-    return
-  }
-
-  if (error) {
-    error
-    return
-  }
-
-  user
-}
+// const Profile = (props: { id: string }) => {
+//   const { isLoading, data: user, error } = useSWR(userById(props.id))
+// }

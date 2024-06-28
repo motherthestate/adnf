@@ -213,19 +213,7 @@ group.cancel()
 
 #### Fetch dependency
 
-Dependent fetches follow other fetches. Maker functions return a special fetch that maintains a specific order.
-
-When using `withFetch` the fetch provided in the creator is the **next** fetch. This is necessary to implement the extend like behavior makers like `withOptions`.
-
-```tsx
-const a = withFetch(fetch, b => b)
-const b = withFetch(fetch, c => c)
-const c = withFetch(b, fetch => fetch)
-
-b() // will first call fetch creator a and then b.
-```
-
-Another example, the fetch returned from your creator is "cached" and are run in sequence.
+Dependent fetches follow other fetches. Maker functions return a special fetch that maintains a specific order. When using `withFetch` the fetch provided in the creator is the **next** fetch. Your fetch creators are made "dependent" and run in sequence once you have initiated a fetch.
 
 ```tsx
 const a = withFetch(fetch, fetch => {

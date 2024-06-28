@@ -1,29 +1,30 @@
 # 🐕 ADNF
+
 **A Dog Named Fetch** - A strict, tiny typescript fetch wrapper.
 
 - [🐕 ADNF](#-adnf)
-   * [Overview](#overview)
-   * [The FetchResult](#the-fetchresult)
-   * [Extend fetchers](#extend-fetchers)
-   * [Reference](#reference)
-      + [Fetchers](#fetchers)
-         - [`fetch`](#fetch)
-      + [Makers](#makers)
-         - [`withMethods`](#withmethods)
-         - [`withResource` & `withBase`](#withresource-withbase)
-         - [`withOptions`](#withoptions)
-         - [`withFetch`](#withfetch)
-         - [`unwrap` and `swr`](#unwrap-and-swr)
-         - [`createAbortGroup*`](#createabortgroup)
-      + [Resources](#resources)
-         - [Fetch dependency](#fetch-dependency)
+  - [Overview](#overview)
+  - [The FetchResult](#the-fetchresult)
+  - [Extend fetchers](#extend-fetchers)
+  - [Reference](#reference)
+    - [Fetchers](#fetchers)
+      - [`fetch`](#fetch)
+    - [Makers](#makers)
+      - [`withMethods`](#withmethods)
+      - [`withResource` & `withBase`](#withresource-withbase)
+      - [`withOptions`](#withoptions)
+      - [`withFetch`](#withfetch)
+      - [`unwrap` and `swr`](#unwrap-and-swr)
+      - [`createAbortGroup*`](#createabortgroup)
+    - [Resources](#resources)
+      - [Fetch dependency](#fetch-dependency)
 
 ## Overview
 
 ```tsx
-import { fetch } from "adnf"
+import { fetch } from 'adnf'
 
-const result = await fetch<User>("/me") // Result<User, unknown>
+const result = await fetch<User>('/me') // Result<User, unknown>
 
 result.user // undefined | User
 
@@ -43,7 +44,7 @@ The `fetch` function has 3 distinct result types. The `FetchResult` type describ
 Additionally `FetchResult` extends a rust inspired `Result` wrapper proving a useful API.
 
 ```tsx
-const result = await fetch<Flower | null, "KNOWN_ERROR">("/flower") // FetchResult<Flower[], unknown>
+const result = await fetch<Flower | null, 'KNOWN_ERROR'>('/flower') // FetchResult<Flower[], never>
 
 result.error // "KNOWN_ERROR" | null | undefined
 
@@ -69,20 +70,19 @@ if (result.failed) {
 You can use the maker function `withOptions`, `withResource`, `withBase` and `withFetch` to extend a fetch.
 
 ```tsx
-import { fetch, withBase } from "adnf"
+import { fetch, withBase } from 'adnf'
 
 // base fetch config
-const baseFetch = withOptions(fetch, { cache: "no-cache" })
-const apiFetch = withBase(baseFetch, "/api")
-const authFetch = withOptions(
-  apiFetch,
-  (options) => ({ headers: { Authorization: localStorage.get("token") } })
-)
+const baseFetch = withOptions(fetch, { cache: 'no-cache' })
+const apiFetch = withBase(baseFetch, '/api')
+const authFetch = withOptions(apiFetch, options => ({
+  headers: { Authorization: localStorage.get('token') },
+}))
 
 // Use `withMethods` to extend your fetch with http methods
 const auth = withMethods(authFetch)
 
-await auth.get("/me")
+await auth.get('/me')
 ```
 
 ## Reference
@@ -115,16 +115,15 @@ fetch(
 
 #### `withMethods`
 
-Extends your fetch with http methods.
+Extends your fetch with http methods. Note that this does not return a fetch signature but an object of fetches, meaning it can not be passed to other makers. Do this last.
 
 ```tsx
-import { fetch, withMethods } from "adnf"
+import { fetch, withMethods } from 'adnf'
 
 const methods = withMethods(fetch)
 
-methods("/")                     // fetch("/", { method: "get" })
-methods.get("/")                 // fetch("/", { method: "get" })
-methods.post("/")                // fetch("/", { method: "post" })
+methods.get('/') // fetch("/", { method: "get" })
+methods.post('/') // fetch("/", { method: "post" })
 ```
 
 #### `withResource` & `withBase`
@@ -132,10 +131,10 @@ methods.post("/")                // fetch("/", { method: "post" })
 Rewrite your fetch resource
 
 ```tsx
-withResource(fetch, "/workspace")
+withResource(fetch, '/workspace')
 // same as: withResource(fetch, (resource) => resource + "/workspace")
 
-withBase(fetch, "/api")
+withBase(fetch, '/api')
 // same as: withResource(fetch, (resource) => "/api" + resource)
 ```
 
@@ -144,25 +143,21 @@ withBase(fetch, "/api")
 Extend your fetch options
 
 ```tsx
-const noCacheFetch = withOptions(fetch, { cache: "no-cache" })
-const cacheFetch = withOptions(noCacheFetch, { cache: "default" }) // overwrites cache
+const noCacheFetch = withOptions(fetch, { cache: 'no-cache' })
+const cacheFetch = withOptions(noCacheFetch, { cache: 'default' }) // overwrites cache
 
 // pass a callback for fresh on-fetch options
-const auth = withOptions(
-  noCacheFetch,
-  (options) => ({ headers: { Authorization: localStorage.get("token") } })
-)
+const auth = withOptions(noCacheFetch, options => ({
+  headers: { Authorization: localStorage.get('token') },
+}))
 ```
 
 #### `withFetch`
 
-Makes a fetch *dependent*. Generally prefer using `withResource` and `withOptions`. Used internally to implement other makers. Read more about [fetch dependency below](#fetch-dependency).
+Makes a fetch _dependent_. Generally prefer using `withResource` and `withOptions`. Used internally to implement other makers. Read more about [fetch dependency below](#fetch-dependency).
 
 ```tsx
-const newFetch = withFetch(
-  fetch,
-  (fetch) => (resource, options) => fetch(resource, { ...options })
-)
+const newFetch = withFetch(fetch, fetch => (resource, options) => fetch(resource, { ...options }))
 ```
 
 #### `unwrap` and `swr`
@@ -178,19 +173,19 @@ const result = await = resultFetch<User>("/me") // FetchResult<User, unkown>
 const user = await = fetch<User>("/me") // User
 ```
 
-#### `createAbortGroup*`
+#### `createAbortGroup`
 
 Creates a grouped abort controller.
 
 ```tsx
-import { createAbortGroup } from "adnf"
+import { createAbortGroup } from 'adnf'
 
 const group = createAbortGroup()
 
 // use abortPrevious for grouped fetched before fetch
-fetch.post("/upload", { abortPrevious: true, group }) // Err
-fetch.post("/upload", { abortPrevious: true, group }) // Err
-fetch.post("/upload", { abortPrevious: true, group }) // Success
+fetch.post('/upload', { abortPrevious: true, group }) // Err
+fetch.post('/upload', { abortPrevious: true, group }) // Err
+fetch.post('/upload', { abortPrevious: true, group }) // Success
 
 // or manually
 group.cancel()
@@ -200,15 +195,50 @@ group.cancel()
 
 #### Fetch dependency
 
-Dependent fetches follow other fetches. Maker functions return a special fetch that keeps track of that sequence. Your initial fetch is passed first during the declaration but last when fetching.
+Dependent fetches follow other fetches. Maker functions return a special fetch that maintains a specific order.
 
-When using `withFetch`the fetch provided in the creator the the **next** fetch. This is necessary to implement the extend like behavior makers like `withOptions`.
+When using `withFetch` the fetch provided in the creator is the **next** fetch. This is necessary to implement the extend like behavior makers like `withOptions`.
 
 ```tsx
-const a = withFetch(fetch, (b) => b)
-const b = withFetch(fetch, (c) => c)
-const c = withFetch(b, (fetch) => fetch)
+const a = withFetch(fetch, b => b)
+const b = withFetch(fetch, c => c)
+const c = withFetch(b, fetch => fetch)
 
 b() // will first call fetch creator a and then b.
 ```
 
+Another example, the fetch returned from your creator is "cached" and are run in sequence.
+
+```tsx
+const a = withFetch(fetch, fetch => {
+  console.log('init: a')
+  return (resource, options) => {
+    console.log('fetch: a')
+    return fetch(resource, options)
+  }
+})
+
+const b = withFetch(a, fetch => {
+  console.log('init: b')
+  return (resource, options) => {
+    console.log('fetch: b')
+    return fetch(resource, options)
+  }
+})
+
+const c = withFetch(c, fetch => {
+  console.log('init: c')
+  return (resource, options) => {
+    console.log('fetch: c')
+    return fetch(resource, options)
+  }
+})
+
+c()
+// init: c
+// init: b
+// init: a
+// fetch: a
+// fetch: b
+// fetch: c
+```

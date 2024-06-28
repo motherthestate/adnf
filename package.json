@@ -22,7 +22,9 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
-  "dependencies": {},
+  "dependencies": {
+    "stable-hash": "^0.0.4"
+  },
   "devDependencies": {
     "@types/eslint": "^8.44.2",
     "@types/node": "^20.5.1",
@@ -32,6 +34,7 @@
     "delay": "^6.0.0",
     "eslint": "^8.45.0",
     "postcss": "^8.4.28",
+    "swr": "^2.2.5",
     "typescript": "^5.2.2",
     "vite": "^4.4.5",
     "vite-plugin-dts": "^3.5.2",

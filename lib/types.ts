@@ -4,32 +4,56 @@ import { Err, Success } from './result'
  * Types
  */
 
-export type FetchSuccess<V> = Success<V> & { aborted: false; timeout: false; response: Response }
+export type Fetch<V = unknown> = (resource: string, options?: FetchOptions) => Promise<V>
+
+export type FetchSuccess<V = unknown> = Success<V> & {
+  aborted: false
+  timeout: false
+  response: Response
+}
 export type FetchErr = Err<null> & { aborted: boolean; timeout: boolean; response: undefined }
-export type FetchErrResponse<ErrType> = Err<ErrType | null> & {
+export type FetchErrResponse<ErrType = unknown> = Err<ErrType | null> & {
   aborted: false
   timeout: false
   response: Response
 }
 
-export type FetchResult<V, E> = FetchSuccess<V> | FetchErrResponse<E> | FetchErr
+export type FetchResult<V = unknown, E = unknown> = FetchSuccess<V> | FetchErrResponse<E> | FetchErr
 
-export type Fetch<Result = any> = (resource: string, options?: FetchOptions) => Promise<Result>
+export type ResultFetch = <V = unknown, E = unknown>(
+  resource: string,
+  options?: FetchOptions
+) => Promise<FetchResult<V, E>>
 
 export type InferResult<F extends Fetch> = F extends Fetch<infer F> ? F : never
 
 export type Dependent<F extends Fetch> = F & {
-  create: (create: DependFetch) => Dependent<F>
-  composedFetch: DependFetch
-  initFetch: Fetch
+  _create: (create: DependFetch) => Dependent<F>
+  _composedFetch: DependFetch
+  _initFetch: Fetch
 }
 
 export type DependFetch = (fetch: Fetch) => Fetch
 
-export type ResultFetch<V = unknown, E = unknown> = <FV = V, FE = E>(
+/**
+ * Fetch declarations
+ */
+
+export type DeclareFetch = <F extends Fetch>(fetch: F) => Declared<F>
+
+export type Declared<F extends Fetch> = <V = unknown, E = unknown>(
   resource: string,
   options?: FetchOptions
-) => Promise<FetchResult<FV, FE>>
+) => Declaration<InferResult<F> extends FetchResult ? Fetch<FetchResult<V, E>> : Fetch<V>>
+
+export type Declaration<F extends Fetch = Fetch> = {
+  fetch: () => ReturnType<F>
+  key: string
+}
+
+export type FetchResultDeclaration<V, E> = Declaration<Fetch<FetchResult<V, E>>>
+
+export type FetchDeclaration<V, E> = Declaration<Fetch<V>>
 
 export type FetchOptions = RequestInit & {
   // strictly json
@@ -48,6 +72,7 @@ export type FetchOptions = RequestInit & {
   unwrap?: boolean
   timeout?: number
   warn?: boolean
+  key?: string
 }
 
 export type FormDataRecord = Record<string, string | Blob>

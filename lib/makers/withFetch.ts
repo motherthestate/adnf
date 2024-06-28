@@ -5,28 +5,28 @@ import { DependFetch, Dependent, Fetch } from '../types'
  */
 
 export const withFetch = <F extends Fetch>(prevFetch: F | Dependent<F>, depend?: DependFetch) => {
-  const initFetch = 'initFetch' in prevFetch ? prevFetch.initFetch : prevFetch
+  const _initFetch = '_initFetch' in prevFetch ? prevFetch._initFetch : prevFetch
   const prevComposed =
-    'composedFetch' in prevFetch ? prevFetch.composedFetch : (fetch: Fetch) => fetch
+    '_composedFetch' in prevFetch ? prevFetch._composedFetch : (fetch: Fetch) => fetch
 
-  const composedFetch = (fetch: Fetch) => {
+  const _composedFetch = (fetch: Fetch) => {
     if (depend) return prevComposed(depend(fetch))
     return prevComposed(fetch)
   }
 
   const fetch: Fetch = (path, opts) => {
     const cappingFetch: Fetch = (resource, options) =>
-      initFetch(resource + path, { ...options, ...opts })
-    return composedFetch(cappingFetch)('', {})
+      _initFetch(resource + path, { ...options, ...opts })
+    return _composedFetch(cappingFetch)('', {})
   }
 
-  const create = (create: DependFetch) => {
+  const _create = (create: DependFetch) => {
     return withFetch(fetch, create)
   }
 
-  return Object.assign(fetch, {
-    initFetch,
-    composedFetch,
-    create,
-  }) as Fetch<F>
+  return Object.assign(fetch as F, {
+    _initFetch,
+    _composedFetch,
+    _create,
+  })
 }

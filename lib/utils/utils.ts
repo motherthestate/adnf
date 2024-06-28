@@ -48,17 +48,10 @@ export const followSignal = (signal: AbortSignal, followingAbortController: Abor
 }
 
 export const mergeOptions = (
-  prevOptions?: FetchOptions,
-  options?: FetchOptions,
+  prevOptions: FetchOptions = {},
+  options: FetchOptions = {},
   warn = true
 ): FetchOptions => {
-  if (!prevOptions) {
-    if (!options) return {}
-    return options
-  }
-
-  if (!options) return {}
-
   if (
     warn &&
     ((prevOptions.group && options.group) ||

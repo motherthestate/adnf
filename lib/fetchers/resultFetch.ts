@@ -1,15 +1,12 @@
 import { Result } from '../result'
-import { FetchOptions, FetchResult, ResultFetch } from '../types'
+import { FetchErr, FetchErrResponse, FetchOptions, FetchSuccess, ResultFetch } from '../types'
 import { followSignal, isFormData, toFormData } from '../utils/utils'
 
 /**
  * ResultFetch
  */
 
-export const resultFetch: ResultFetch = async <V = unknown, E = unknown>(
-  resource: string,
-  options?: FetchOptions
-): Promise<FetchResult<V, E>> => {
+export const resultFetch: ResultFetch = async (resource, options) => {
   const {
     strict = true,
     fetchSymbol = Symbol(),
@@ -141,13 +138,10 @@ export const resultFetch: ResultFetch = async <V = unknown, E = unknown>(
       const contentTypeSupportsJSON = contentType?.includes('application/json')
 
       if (strict && !contentTypeSupportsJSON) {
-        return Object.assign(
-          Result.Err(null, 'Fetch response not json in: fetch(..., { strict: true })'),
-          {
-            aborted: false,
-            timeout: false,
-            response,
-          } as const
+        return makeResultErrResponse(
+          response,
+          null,
+          'Fetch response not json in: fetch(..., { strict: true })'
         )
       }
 
@@ -156,53 +150,70 @@ export const resultFetch: ResultFetch = async <V = unknown, E = unknown>(
        */
 
       const resultText = await response.text()
-      const resultData = (contentTypeSupportsJSON ? parse(resultText) : resultText) as V
+      const resultData = contentTypeSupportsJSON ? parse(resultText) : resultText
 
       if (responseOk) {
-        return Object.assign(Result(resultData), {
-          aborted: false,
-          timeout: false,
-          response,
-        } as const)
+        return makeResultSuccess(response, resultData)
       }
 
-      const errorType = resultData as unknown as E
+      const errorType = resultData
 
       if (strict && !errorType) {
-        return Object.assign(
-          Result.Err(null, 'Fetch response error nullable in: fetch(..., { strict: true })'),
-          {
-            aborted: false,
-            timeout: false,
-            response,
-          } as const
+        return makeResultErrResponse(
+          response,
+          null,
+          'Fetch response error nullable in: fetch(..., { strict: true })'
         )
       }
 
-      // fetch response error
-      return Object.assign(Result.Err(errorType as E), {
-        aborted: false,
-        timeout: false,
-        response,
-      } as const)
+      return makeResultErrResponse(response, errorType)
     } catch (err) {
       // No fetch response error
       const abortDueToTimeout =
         abortController.signal.aborted && abortController.signal.reason === TimeoutReason
 
-      return Object.assign(Result.Err(null, err), {
+      return makeResultErr(err as string, {
         aborted: abortController.signal.aborted,
         timeout: abortDueToTimeout,
-        response: undefined,
       })
     }
   } catch (err) {
-    return Object.assign(Result.Err(null, err), {
+    return makeResultErr(err as string, {
       aborted: false,
       timeout: false,
-      response: undefined,
     })
   }
+}
+
+const makeResultSuccess = <V = unknown>(response: Response, value: V): FetchSuccess<V> => {
+  return Object.assign(Result(value), {
+    aborted: false,
+    timeout: false,
+    response,
+  } as const)
+}
+
+const makeResultErrResponse = <E = unknown>(
+  response: Response,
+  type: E,
+  message?: string,
+  props: Partial<FetchErrResponse> = {}
+): FetchErrResponse<E> => {
+  return Object.assign(Result.Err(type, message), {
+    aborted: false,
+    timeout: false,
+    ...props,
+    response,
+  } as const)
+}
+
+const makeResultErr = (message: string, props: Partial<FetchErr> = {}): FetchErr => {
+  return Object.assign(Result.Err(null, message), {
+    aborted: false,
+    timeout: false,
+    ...props,
+    response: undefined,
+  })
 }
 
 /**

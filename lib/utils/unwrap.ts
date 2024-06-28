@@ -1,7 +1,12 @@
-import { FetchOptions, ResultFetch } from "../types"
+import { FetchOptions, ResultFetch } from '../types'
+
+/**
+ * unwrap:
+ * modifies fetch signature
+ */
 
 export const unwrap = (fetch: ResultFetch) => {
-  return <V = unknown, E = unknown>(url: string, options?: FetchOptions) => {
-    return fetch<V, E>(url, options).then((result) => result.unwrap())
+  return <V = unknown, E = unknown>(resource: string, options?: FetchOptions) => {
+    return fetch<V, E>(resource, options).then(result => result.unwrap())
   }
 }

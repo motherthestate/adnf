@@ -36,10 +36,10 @@ if (result.success) {
 
 ## The FetchResult
 
-The `fetch` function has 3 distinct result types. The `FetchResult` type describes all three result types:
+The `fetch` function has 3 distinct result types. The `FetchResult<V, E>` type describes all three result types:
 
-- `Success`: Fetch was successful
-- `ErrResponse`: Fetch returned response but with error status code
+- `Success<V>`: Fetch was successful
+- `ErrResponse<E>`: Fetch returned response but with error status code
 - `Err`: No response. Strict error thrown, network error, fetch aborted
 
 Additionally `FetchResult` extends a rust inspired `Result` wrapper proving a useful API.

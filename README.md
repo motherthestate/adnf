@@ -13,6 +13,7 @@
       - [`withMethods`](#withmethods)
       - [`withResource` & `withBase`](#withresource-withbase)
       - [`withOptions`](#withoptions)
+      - [`withDeclarations`](#withdeclarations)
       - [`withFetch`](#withfetch)
       - [`unwrap` and `swr`](#unwrap-and-swr)
       - [`createAbortGroup*`](#createabortgroup)

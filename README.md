@@ -38,7 +38,7 @@ if (result.success) {
 
 ## The FetchResult
 
-The `fetch` function has 3 distinct result types. The `FetchResult<V, E>` type describes all three result types:
+The `fetch` function has 3 result types. The `FetchResult<V, E>` type describes all three result types:
 
 - `Success<V>`: Fetch was successful
 - `ErrResponse<E>`: Fetch returned response but with error status code
@@ -70,7 +70,7 @@ if (result.failed) {
 
 ## Extend fetchers
 
-You can use the maker function `withOptions`, `withResource`, `withBase` and `withFetch` to extend a fetch.
+You can use the maker functions `withOptions`, `withResource`, `withBase` and `withFetch` to sequentially extend a fetch.
 
 ```tsx
 import { fetch, withBase } from 'adnf'
@@ -172,7 +172,7 @@ declaration.fetch() // run fetch as usual
 
 #### `withFetch`
 
-Create a fetch creator that runs in-order when used. Used to create a fetch that is _dependent_ on the next fetch. Used internally to implement other makers. Read more about [fetch dependency below](#fetch-dependency).
+Create fetch creators that run sequentially when initiating a fetch. Used to create a fetch that is _dependent_ on the next fetch. Used internally to implement other makers. Read more about [fetch dependency below](#fetch-dependency).
 
 ```tsx
 const newFetch = withFetch(fetch, fetch => (resource, options) => fetch(resource, { ...options }))

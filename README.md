@@ -13,11 +13,14 @@
       - [`withMethods`](#withmethods)
       - [`withResource` & `withBase`](#withresource-withbase)
       - [`withOptions`](#withoptions)
+      - [`🐛 withDeclarations`](#withdeclarations)
       - [`withFetch`](#withfetch)
       - [`unwrap` and `swr`](#unwrap-and-swr)
-      - [`createAbortGroup*`](#createabortgroup)
+      - [`createAbortGroup`](#createabortgroup)
     - [Resources](#resources)
       - [Fetch dependency](#fetch-dependency)
+      - [ADNF + SWR](#adnf-+-swr)
+
 
 ## Overview
 
@@ -35,10 +38,10 @@ if (result.success) {
 
 ## The FetchResult
 
-The `fetch` function has 3 distinct result types. The `FetchResult` type describes all three result types:
+The `fetch` function has 3 distinct result types. The `FetchResult<V, E>` type describes all three result types:
 
-- `Success`: Fetch was successful
-- `ErrResponse`: Fetch returned response but with error status code
+- `Success<V>`: Fetch was successful
+- `ErrResponse<E>`: Fetch returned response but with error status code
 - `Err`: No response. Strict error thrown, network error, fetch aborted
 
 Additionally `FetchResult` extends a rust inspired `Result` wrapper proving a useful API.
@@ -152,6 +155,21 @@ const auth = withOptions(noCacheFetch, options => ({
 }))
 ```
 
+#### `withDeclarations`
+
+Helps with prepared fetches. Describe a fetch to run later. Additionally a fetch key is generated to identify requests.
+
+```tsx
+const declare = withDeclarations(fetch)
+
+const fetchUser = (id) => declare("/user", { params: { id } })
+
+const declaration = fetchUser("a")
+
+declaration.key // "/user?id='a'"
+declaration.fetch() // run fetch as usual
+```
+
 #### `withFetch`
 
 Makes a fetch _dependent_. Generally prefer using `withResource` and `withOptions`. Used internally to implement other makers. Read more about [fetch dependency below](#fetch-dependency).
@@ -242,3 +260,8 @@ c()
 // fetch: b
 // fetch: c
 ```
+
+#### ADNF + SWR
+
+[See repo resources](https://github.com/weltmx/adnf/blob/main/resources/use-with-swr.md)
+

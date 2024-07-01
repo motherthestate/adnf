@@ -1,7 +1,20 @@
-import { debugFetch, withDeclarations } from '../lib'
+// import { debugFetch, params, withDeclarations, withOptions } from '../lib'
 
-const fetch = withDeclarations(debugFetch)
+// // const b = withOptions(debugFetch, { method: 'get' })
+// // const fetch = withDeclarations(b)
 
-const userById = (id: string) => fetch('/test', { params: { id } })
+// // const userById = fetch<number, unknown, { id: string }>('/test', args => {
+// //   return {
+// //     params: { id: args.id },
+// //   }
+// // })
 
-console.log(userById('a'))
+// // const main = async () => {
+// //   const result = await userById.fetch({ id: 'a' })
+// // }
+
+// // main()
+
+// console.log(params('/user', { id: 'a' }))
+// console.log(params('https://developer.mozilla.org/user', { id: 'a' }))
+// console.log(params('https://developer.mozilla.org/user?id=a&for=b', { id: 'a' }))

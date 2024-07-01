@@ -63,7 +63,7 @@ export const mergeOptions = (
     )
   }
 
-  const mergedOptions = structuredClone({ ...prevOptions, ...options })
+  const mergedOptions = { ...prevOptions, ...options }
 
   if (prevOptions.headers || options.headers) {
     mergedOptions.headers = {
@@ -87,6 +87,56 @@ export const mergeOptions = (
   }
 
   return mergedOptions
+}
+
+/**
+ * Append search params to resource or complete URL.
+ *
+ * ```ts
+ * respectParams('/user', { id: 'a' })
+ * // /user?id=a
+ * respectParams('https://github.com/user', { id: 'a' })
+ * // https://github.com/user?id=a
+ * respectParams('https://github.com/user?id=a&for=b', { id: 'b' })
+ * // https://github.com/user?id=b&for=b
+ * ```
+ */
+
+export const respectParams = (path: string, params: Record<string, any>, replace = false) => {
+  const url = new URL(path, 'https://developer.mozilla.org')
+
+  // get existing params from resource
+  const resourceParams = Object.fromEntries(url.searchParams)
+  const newParams = Object.fromEntries(new URLSearchParams(params))
+
+  const mergedParams = new URLSearchParams(
+    replace ? newParams : { ...resourceParams, ...newParams }
+  )
+  const searchParams = mergedParams.toString()
+  const prefixed = searchParams ? `?${searchParams}` : ''
+
+  if (isValidURL(path)) return `${url.origin}${url.pathname}${prefixed}`
+  return `${url.pathname}${prefixed}`
+}
+
+/**
+ * Is valid URL with origin
+ */
+
+export const isValidURL = (url: string) => {
+  try {
+    return !!new URL(url)
+  } catch (err) {
+    return false
+  }
+}
+
+/**
+ * Is method 'post', 'put', 'delete', 'patch'
+ */
+
+export const isMutateMethod = (method: string) => {
+  return ['post', 'put', 'delete', 'patch'].includes(method.toLowerCase())
 }
 
 export const isNullable = <V>(value: V): value is NonNullable<V> =>

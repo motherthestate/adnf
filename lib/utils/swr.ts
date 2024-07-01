@@ -8,7 +8,9 @@ import { FetchOptions, ResultFetch } from '../types'
 export const swr = (fetch: ResultFetch) => {
   return <V = unknown, E = unknown>(resource: string, options?: FetchOptions) => {
     return fetch<V, E>(resource, options).then(result => {
-      if (result.failed) throw SWRError(result.error, result.response?.status)
+      if (result.failed) {
+        throw SWRError(result.error, result.response?.status)
+      }
       return result.value
     })
   }

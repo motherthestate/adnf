@@ -1,6 +1,6 @@
 import stableHash from 'stable-hash'
 import { DeclareFetch, FetchOptions } from '../types'
-import { mergeOptions } from '../utils/utils'
+import { isMutateMethod, mergeOptions } from '../utils/utils'
 
 /**
  * withDeclarations
@@ -8,9 +8,21 @@ import { mergeOptions } from '../utils/utils'
 
 export const withDeclarations: DeclareFetch = fetch => {
   return (resource, options) => {
-    const key = hashFetch(resource, options)
-    const prepFetch = (opts?: FetchOptions) => {
-      return fetch(resource, mergeOptions(options, { ...opts, key }))
+    const passingArgs = typeof options === 'function'
+    const key = hashFetch(resource, typeof options === 'function' ? {} : options)
+
+    const prepFetch = (args: any, prepOptions?: FetchOptions) => {
+      const opts = typeof options === 'function' ? options(args) : options
+      const mergedOptions = mergeOptions(opts, {
+        key,
+        method: passingArgs
+          ? opts?.method && isMutateMethod(opts.method)
+            ? opts.method
+            : 'post'
+          : options?.method,
+      })
+
+      return fetch(resource, mergeOptions(mergedOptions, prepOptions))
     }
 
     return {

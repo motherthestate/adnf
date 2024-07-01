@@ -1,6 +1,6 @@
 import { Result } from '../result'
 import { FetchErr, FetchErrResponse, FetchOptions, FetchSuccess, ResultFetch } from '../types'
-import { followSignal, isFormData, toFormData } from '../utils/utils'
+import { followSignal, isFormData, respectParams, toFormData } from '../utils/utils'
 
 /**
  * ResultFetch
@@ -111,13 +111,7 @@ export const resultFetch: ResultFetch = async (resource, options) => {
      * Search params
      */
 
-    // merge params
-    const searchParams = new URLSearchParams({
-      ...Object.fromEntries(new URL(resource).searchParams),
-      ...Object.fromEntries(new URLSearchParams(params ?? {})),
-    })
-
-    const fetchResource = params ? `${resource}?${searchParams.toString()}` : resource
+    const fetchResource = respectParams(resource, params ?? {})
 
     /**
      * Fetch

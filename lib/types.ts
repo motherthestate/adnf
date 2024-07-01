@@ -12,7 +12,10 @@ export type Fetch<V = unknown, E = unknown> = (
   options?: FetchOptions
 ) => PromiseWithError<V, E>
 
-export type PreparedFetch<V = unknown, E = unknown> = () => PromiseWithError<V, E>
+export type PreparedFetch<V = unknown, E = unknown, A = unknown> = (
+  args: A,
+  options?: FetchOptions
+) => PromiseWithError<V, E>
 
 export type FetchSuccess<V = unknown> = Success<V> & {
   aborted: false
@@ -56,18 +59,20 @@ export type DependFetch = (fetch: Fetch) => Fetch
 
 export type DeclareFetch = <F extends Fetch>(fetch: F) => Declare<F>
 
-export type Declare<F extends Fetch> = <V = unknown, E = unknown>(
+export type Declare<F extends Fetch> = <V = unknown, E = unknown, A = unknown>(
   resource: string,
-  options?: FetchOptions
-) => InferResult<F> extends FetchResult ? Declaration<FetchResult<V, E>> : Declaration<V, null | E>
+  options?: FetchOptions | ((args: A) => FetchOptions)
+) => InferResult<F> extends FetchResult
+  ? Declaration<FetchResult<V, E>, never, A>
+  : Declaration<V, null | E, A>
 
-export type Declaration<Result, E = never> = {
-  fetch: PreparedFetch<Result, E>
+export type Declaration<Result, E = never, A = unknown> = {
+  fetch: PreparedFetch<Result, E, A>
   key: string
 }
 
 export type FetchResultDeclaration<V, E> = Declaration<FetchResult<V, E>>
-export type FetchDeclaration<V, E> = Declaration<V, E>
+export type FetchDeclaration<V, E, A = unknown> = Declaration<V, E, A>
 
 export type FetchOptions = RequestInit & {
   // strictly json

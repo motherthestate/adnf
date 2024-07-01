@@ -188,7 +188,7 @@ declaration.key // "@"/user",#params:#id:"a",,,"
 declaration.fetch() // run fetch as usual
 ```
 
-For mutations where your preparing arguments should cannot be part of the key. Not that this will force your fetch to the `post` method.
+For mutations where some arguments should not be part of the cache key, declare can be provided a function that will build options after the key was generated. Not that this will force your fetch to be a mutate method i.e. `post`, `put`, `delete` or `patch`.
 
 ```tsx
 const fetchUser = declare<User, void, { id: string }>('/user', (args) => ({ params: { id: args.id } }))

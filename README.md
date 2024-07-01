@@ -188,6 +188,16 @@ declaration.key // "@"/user",#params:#id:"a",,,"
 declaration.fetch() // run fetch as usual
 ```
 
+For mutations where your preparing arguments should cannot be part of the key.
+
+```tsx
+const fetchUser = declare<User, void, { id: string }>('/user', (args) => ({ params: { id: args.id } }))
+
+declaration.key // "@"/user",#params,,"
+
+const declaration = fetchUser.fetch({ id: 'a' })
+```
+
 #### `withFetch`
 
 Create fetch creators that run sequentially when initiating a fetch. Used to create a fetch that is _dependent_ on the next fetch. Used internally to implement other makers. Read more about [fetch dependency below](#fetch-dependency).

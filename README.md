@@ -206,6 +206,8 @@ Create fetch creators that run sequentially when initiating a fetch. Used to cre
 const newFetch = withFetch(fetch, fetch => (resource, options) => fetch(resource, { ...options }))
 ```
 
+### Helpers
+
 #### `unwrap` and `swr`
 
 If you’re working with a library that expects errors to be thrown i.e. [SWR](https://swr.vercel.app/docs/error-handling), use unwrap. Unwrapping fetch does not restore the Fetch API 1:1, primarily differences in behavior due to ResultFetch’s strict option.
@@ -235,6 +237,21 @@ fetch.post('/upload', { abortPrevious: true, group }) // Success
 
 // or manually
 group.cancel()
+```
+
+#### `respectParams`
+
+Merge/replace search params to resource or complete URL. Will respect provided format.
+
+`respectParams(path: string, params, replace: boolean)`
+
+```ts
+respectParams('/user', { id: 'a' })
+// /user?id=a
+respectParams('https://github.com/user?id=a&for=b', { id: 'b' })
+// https://github.com/user?id=b&for=b
+respectParams('https://github.com/user?id=a&for=b', { id: 'b' }, true)
+// https://github.com/user?id=b
 ```
 
 ### Recipes

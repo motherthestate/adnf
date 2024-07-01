@@ -15,8 +15,10 @@
       - [`withOptions`](#withoptions)
       - [`🐛 withDeclarations`](#withdeclarations)
       - [`withFetch`](#withfetch)
+    - [Helpers](#helpers)
       - [`unwrap` and `swr`](#unwrap-and-swr)
       - [`createAbortGroup`](#createabortgroup)
+      - [`respectParams`](#respectparams)
     - [Recipes](#recipes)
     - [Resources](#resources)
       - [Fetch dependency](#fetch-dependency)
@@ -188,6 +190,16 @@ declaration.key // "@"/user",#params:#id:"a",,,"
 declaration.fetch() // run fetch as usual
 ```
 
+For mutations where some arguments should not be part of the cache key, declare can be provided a function that will build options after the key was generated. Note that this will force your fetch to be a mutate method i.e. `post`, `put`, `delete` or `patch`.
+
+```tsx
+const fetchUser = declare<User, void, { id: string }>('/user', (args) => ({ params: { id: args.id } }))
+
+declaration.key // "@"/user",#params,,"
+
+const declaration = fetchUser.fetch({ id: 'a' }) // fetch('/user', { method: "post", params: { id: 'a' }, ... })
+```
+
 #### `withFetch`
 
 Create fetch creators that run sequentially when initiating a fetch. Used to create a fetch that is _dependent_ on the next fetch. Used internally to implement other makers. Read more about [fetch dependency below](#fetch-dependency).
@@ -195,6 +207,8 @@ Create fetch creators that run sequentially when initiating a fetch. Used to cre
 ```tsx
 const newFetch = withFetch(fetch, fetch => (resource, options) => fetch(resource, { ...options }))
 ```
+
+### Helpers
 
 #### `unwrap` and `swr`
 
@@ -225,6 +239,21 @@ fetch.post('/upload', { abortPrevious: true, group }) // Success
 
 // or manually
 group.cancel()
+```
+
+#### `respectParams`
+
+Merge/replace search params to resource or complete URL. Will respect provided format.
+
+`respectParams(path: string, params, replace: boolean)`
+
+```ts
+respectParams('/user', { id: 'a' })
+// /user?id=a
+respectParams('https://github.com/user?id=a&for=b', { id: 'b' })
+// https://github.com/user?id=b&for=b
+respectParams('https://github.com/user?id=a&for=b', { id: 'b' }, true)
+// https://github.com/user?id=b
 ```
 
 ### Recipes

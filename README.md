@@ -188,14 +188,14 @@ declaration.key // "@"/user",#params:#id:"a",,,"
 declaration.fetch() // run fetch as usual
 ```
 
-For mutations where your preparing arguments should cannot be part of the key.
+For mutations where your preparing arguments should cannot be part of the key. Not that this will force your fetch to the `post` method.
 
 ```tsx
 const fetchUser = declare<User, void, { id: string }>('/user', (args) => ({ params: { id: args.id } }))
 
 declaration.key // "@"/user",#params,,"
 
-const declaration = fetchUser.fetch({ id: 'a' })
+const declaration = fetchUser.fetch({ id: 'a' }) // fetch('/user', { method: "post", params: { id: 'a' }, ... })
 ```
 
 #### `withFetch`

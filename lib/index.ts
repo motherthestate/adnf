@@ -16,11 +16,11 @@ export { withResource, withBase } from './makers/withResource'
 export { withMethods } from './makers/withMethods'
 export { withDeclarations } from './makers/withDeclarations'
 
-export { createAbortGroup } from './utils/createAbortGroup'
-export { unwrap } from './utils/unwrap'
-export { swr } from './utils/swr'
-export { mergeOptions, respectParams } from './utils/utils'
-export type { SWRError } from './utils/swr'
+export { createAbortGroup } from './helpers/createAbortGroup'
+export { unwrap } from './helpers/unwrap'
+export { swrResult } from './helpers/swr'
+export { mergeOptions, respectParams } from './helpers/utils'
+export type { SWRError } from './helpers/swr'
 
 /**
  * Types

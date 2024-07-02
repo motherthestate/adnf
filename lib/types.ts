@@ -59,20 +59,20 @@ export type DependFetch = (fetch: Fetch) => Fetch
 
 export type DeclareFetch = <F extends Fetch>(fetch: F) => Declare<F>
 
-export type Declare<F extends Fetch> = <V = unknown, E = unknown, A = unknown>(
+export type Declare<F extends Fetch> = <V = unknown, E = unknown, A = void>(
   resource: string,
   options?: FetchOptions | ((args: A) => FetchOptions)
 ) => InferResult<F> extends FetchResult
   ? Declaration<FetchResult<V, E>, never, A>
   : Declaration<V, null | E, A>
 
-export type Declaration<Result, E = never, A = unknown> = {
+export type Declaration<Result, E = never, A = void> = {
   fetch: PreparedFetch<Result, E, A>
   key: string
 }
 
 export type FetchResultDeclaration<V, E> = Declaration<FetchResult<V, E>>
-export type FetchDeclaration<V, E, A = unknown> = Declaration<V, E, A>
+export type FetchDeclaration<V, E, A = void> = Declaration<V, E, A>
 
 export type FetchOptions = RequestInit & {
   // strictly json

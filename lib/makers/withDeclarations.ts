@@ -1,6 +1,6 @@
 import stableHash from 'stable-hash'
 import { DeclareFetch, FetchOptions } from '../types'
-import { isMutateMethod, mergeOptions } from '../utils/utils'
+import { isMutateMethod, mergeOptions } from '../helpers/utils'
 
 /**
  * withDeclarations

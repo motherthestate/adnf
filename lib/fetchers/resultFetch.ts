@@ -1,6 +1,6 @@
 import { Result } from '../result'
 import { FetchErr, FetchErrResponse, FetchOptions, FetchSuccess, ResultFetch } from '../types'
-import { followSignal, isFormData, respectParams, toFormData } from '../utils/utils'
+import { followSignal, isFormData, respectParams, toFormData } from '../helpers/utils'
 
 /**
  * ResultFetch

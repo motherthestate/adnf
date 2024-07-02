@@ -193,7 +193,9 @@ declaration.fetch() // run fetch as usual
 For mutations where some arguments should not be part of the cache key, declare can be provided a function that will build options after the key was generated. Note that this will force your fetch to be a mutate method i.e. `post`, `put`, `delete` or `patch`.
 
 ```tsx
-const fetchUser = declare<User, void, { id: string }>('/user', (args) => ({ params: { id: args.id } }))
+const fetchUser = declare<User, void, { id: string }>('/user', args => ({
+  params: { id: args.id },
+}))
 
 declaration.key // "@"/user",#params,,"
 
@@ -210,9 +212,9 @@ const newFetch = withFetch(fetch, fetch => (resource, options) => fetch(resource
 
 ### [Helpers](https://github.com/weltmx/adnf/tree/main/lib/helpers)
 
-#### `unwrap` and `swr`
+#### `unwrap`
 
-If you’re working with a library that expects errors to be thrown i.e. [SWR](https://swr.vercel.app/docs/error-handling), use unwrap. Unwrapping fetch does not restore the Fetch API 1:1, primarily differences in behavior due to ResultFetch’s strict option.
+If you’re working with a library that expects errors to be thrown, use unwrap. Unwrapping fetch does not restore the Fetch API 1:1, primarily differences in behavior due to ResultFetch’s strict option.
 
 ```tsx
 import { fetch as resultFetch, unwrap } from "adnf"

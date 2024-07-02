@@ -97,6 +97,8 @@ await auth.get('/me')
 
 ### Fetchers
 
+[View /fetchers](https://github.com/weltmx/adnf/tree/main/lib/fetchers)
+
 #### `fetch`
 
 The `ResultFetch` returning a `FetchResult`
@@ -135,6 +137,8 @@ debugFetch('/user') // logs fetch to console
 ```
 
 ### Makers
+
+[View /makers](https://github.com/weltmx/adnf/tree/main/lib/makers)
 
 #### `withMethods`
 
@@ -209,6 +213,8 @@ const newFetch = withFetch(fetch, fetch => (resource, options) => fetch(resource
 ```
 
 ### Helpers
+
+[View /helpers](https://github.com/weltmx/adnf/tree/main/lib/helpers)
 
 #### `unwrap` and `swr`
 

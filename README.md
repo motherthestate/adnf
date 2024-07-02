@@ -134,9 +134,7 @@ import { debugFetch } from 'adnf'
 debugFetch('/user') // logs fetch to console
 ```
 
-### Makers
-
-[View /makers](https://github.com/weltmx/adnf/tree/main/lib/makers)
+### [Makers](https://github.com/weltmx/adnf/tree/main/lib/makers)
 
 #### `withMethods`
 
@@ -210,9 +208,7 @@ Create fetch creators that run sequentially when initiating a fetch. Used to cre
 const newFetch = withFetch(fetch, fetch => (resource, options) => fetch(resource, { ...options }))
 ```
 
-### Helpers
-
-[View /helpers](https://github.com/weltmx/adnf/tree/main/lib/helpers)
+### [Helpers](https://github.com/weltmx/adnf/tree/main/lib/helpers)
 
 #### `unwrap` and `swr`
 

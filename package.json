@@ -1,6 +1,6 @@
 {
   "name": "adnf",
-  "version": "0.0.13",
+  "version": "0.0.15",
   "type": "module",
   "files": [
     "dist"

@@ -71,7 +71,7 @@ export type Declaration<Result, E = never, A = void> = {
   key: string
 }
 
-export type FetchResultDeclaration<V, E> = Declaration<FetchResult<V, E>>
+export type FetchResultDeclaration<V, E, A = void> = Declaration<FetchResult<V, E>, never, A>
 export type FetchDeclaration<V, E, A = void> = Declaration<V, E, A>
 
 export type FetchOptions = RequestInit & {

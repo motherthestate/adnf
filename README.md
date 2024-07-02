@@ -95,9 +95,7 @@ await auth.get('/me')
 
 ## Reference
 
-### Fetchers
-
-[View /fetchers](https://github.com/weltmx/adnf/tree/main/lib/fetchers)
+### [Fetchers](https://github.com/weltmx/adnf/tree/main/lib/fetchers)
 
 #### `fetch`
 

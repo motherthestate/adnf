@@ -2,7 +2,6 @@
 
 **A Dog Named Fetch** - A strict, tiny typescript fetch wrapper.
 
-- [🐕 ADNF](#-adnf)
   - [Overview](#overview)
   - [The FetchResult](#the-fetchresult)
   - [Extend fetchers](#extend-fetchers)

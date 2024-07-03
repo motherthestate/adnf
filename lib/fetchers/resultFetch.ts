@@ -1,4 +1,4 @@
-import { Result } from '../result'
+import { Result, isError } from '../result'
 import { FetchErr, FetchErrResponse, FetchOptions, FetchSuccess, ResultFetch } from '../types'
 import { followSignal, isFormData, respectParams, toFormData } from '../helpers/utils'
 
@@ -135,7 +135,7 @@ export const resultFetch: ResultFetch = async (resource, options) => {
         return ResultErrResponse(
           response,
           null,
-          'Fetch response not json in: fetch(..., { strict: true })'
+          new Error('Fetch response not json in: fetch(..., { strict: true })')
         )
       }
 
@@ -156,7 +156,7 @@ export const resultFetch: ResultFetch = async (resource, options) => {
         return ResultErrResponse(
           response,
           null,
-          'Fetch response error nullable in: fetch(..., { strict: true })'
+          new Error('Fetch response error nullable in: fetch(..., { strict: true })')
         )
       }
 
@@ -166,13 +166,13 @@ export const resultFetch: ResultFetch = async (resource, options) => {
       const abortDueToTimeout =
         abortController.signal.aborted && abortController.signal.reason === TimeoutReason
 
-      return ResultErr(err as string, {
+      return ResultErr(isError(err) ? err : undefined, {
         aborted: abortController.signal.aborted,
         timeout: abortDueToTimeout,
       })
     }
   } catch (err) {
-    return ResultErr(err as string, {
+    return ResultErr(isError(err) ? err : undefined, {
       aborted: false,
       timeout: false,
     })
@@ -184,6 +184,7 @@ const ResultSuccess = <V = unknown>(response: Response, value: V): FetchSuccess<
     aborted: false,
     timeout: false,
     resolved: true,
+    declarationError: false,
     response,
   } as const)
 }
@@ -191,23 +192,25 @@ const ResultSuccess = <V = unknown>(response: Response, value: V): FetchSuccess<
 const ResultErrResponse = <E = unknown>(
   response: Response,
   type: E,
-  message?: string,
+  error?: Error,
   props: Partial<FetchErrResponse> = {}
 ): FetchErrResponse<E> => {
-  return Object.assign(Result.Err(type, message), {
+  return Object.assign(Result.Err(type, error), {
     aborted: false,
     timeout: false,
     resolved: true,
+    declarationError: false,
     ...props,
     response,
   } as const)
 }
 
-export const ResultErr = (message: string, props: Partial<FetchErr> = {}): FetchErr => {
-  return Object.assign(Result.Err(null, message), {
+export const ResultErr = (error?: Error, props: Partial<FetchErr> = {}): FetchErr => {
+  return Object.assign(Result.Err(null, error), {
     aborted: false,
     timeout: false,
     resolved: false,
+    declarationError: false,
     ...props,
     response: undefined,
   } as const)

@@ -5,7 +5,10 @@ const Success = <V>(value: V) => {
     value,
     failed: false,
     success: true,
+    type: undefined,
+    errorType: undefined,
     error: undefined,
+    message: undefined,
     unwrap: () => value,
     log: () => void console.log(value),
     notNullable: () => assert(value),
@@ -14,18 +17,21 @@ const Success = <V>(value: V) => {
 
 export const Result = Object.assign(Success, {
   Success,
-  Err: <ET>(error: ET, message?: unknown) => {
+  Err: <ET>(type: ET, error?: Error) => {
+    const log = () => void console.error({ type, error, message: error?.message })
     return {
       value: undefined,
+      type,
+      errorType: type,
       error,
+      message: error?.message,
       failed: true,
       success: false,
-      log: () => void console.error({ type: error, message }),
+      log,
       unwrap: () => {
-        if (typeof error === 'string') throw new Error(error)
-        if (typeof message === 'string') throw new Error(message)
-        console.error(`Result.error: `, { error, message })
-        throw new Error('Result.error: Unknown error')
+        if (isError(error)) throw error
+        log() // log error, otherwise type will be missing for debugging
+        throw new Error('Result.error: thrown error is not instance of Error')
       },
       notNullable: () => {
         throw new Error('Result.distinct: Nullable value or error')
@@ -34,11 +40,28 @@ export const Result = Object.assign(Success, {
   },
 })
 
+/**
+ * tcResult
+ */
+
+export const tcResult = <R>(tryFn: () => R) => {
+  try {
+    return Result.Success(tryFn())
+  } catch (err) {
+    return Result.Err(null, isError(err) ? err : undefined)
+  }
+}
+
+export const isError = (v: any): v is Error => v instanceof Error
+
 // results
 
 export type Success<V> = {
   value: V
+  type: undefined
+  errorType: undefined
   error: undefined
+  message: undefined
   failed: false
   success: true
   unwrap: () => V
@@ -46,10 +69,13 @@ export type Success<V> = {
   notNullable: () => NonNullable<V>
 }
 
-export type Err<E> = {
+export type Err<T> = {
   value: undefined
-  error: E
+  type: T
   failed: true
+  errorType: T
+  error: Error | undefined
+  message: string | undefined
   success: false
   unwrap: () => never
   log: () => void

@@ -1,6 +1,8 @@
 import stableHash from 'stable-hash'
-import { DeclareFetch, FetchOptions } from '../types'
 import { isMutateMethod, mergeOptions } from '../helpers/utils'
+import { DeclareFetch, FetchOptions } from '../types'
+import { ResultErr } from '../fetchers/resultFetch'
+import { tcResult } from '../result'
 
 /**
  * withDeclarations
@@ -12,7 +14,15 @@ export const withDeclarations: DeclareFetch = fetch => {
     const key = hashFetch(resource, typeof options === 'function' ? {} : options)
 
     const prepFetch = (args: any, prepOptions?: FetchOptions) => {
-      const opts = typeof options === 'function' ? options(args) : options
+      const optionsResult = tcResult(() =>
+        typeof options === 'function' ? options(args) : options
+      )
+
+      if (optionsResult.failed) {
+        return ResultErr(optionsResult.error, { declarationError: true })
+      }
+
+      const opts = optionsResult.value
       const mergedOptions = mergeOptions(opts, {
         key,
         method: passingArgs

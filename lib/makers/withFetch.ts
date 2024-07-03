@@ -1,26 +1,37 @@
-import { DependFetch, Dependent, Fetch } from '../types'
+import { ResultErr } from '../fetchers/resultFetch'
+import { isError } from '../result'
+import { DependResultFetch, Dependent, ResultFetch } from '../types'
 
 /**
  * withFetch
  */
 
-export const withFetch = <F extends Fetch>(prevFetch: F | Dependent<F>, depend?: DependFetch) => {
+export const withFetch = <F extends ResultFetch>(
+  prevFetch: F | Dependent<F>,
+  depend?: DependResultFetch
+) => {
   const _initFetch = '_initFetch' in prevFetch ? prevFetch._initFetch : prevFetch
   const prevComposed =
-    '_composedFetch' in prevFetch ? prevFetch._composedFetch : (fetch: Fetch) => fetch
+    '_composedFetch' in prevFetch ? prevFetch._composedFetch : (fetch: ResultFetch) => fetch
 
-  const _composedFetch = (fetch: Fetch) => {
+  const _composedFetch = (fetch: ResultFetch) => {
     if (depend) return prevComposed(depend(fetch))
     return prevComposed(fetch)
   }
 
-  const fetch: Fetch = (path, opts) => {
-    const cappingFetch: Fetch = (resource, options) =>
-      _initFetch(resource + path, { ...options, ...opts })
-    return _composedFetch(cappingFetch)('', {})
+  const fetch: ResultFetch = async (path, opts) => {
+    const cappingFetch: ResultFetch = (resource, options) => {
+      return _initFetch(resource + path, { ...options, ...opts })
+    }
+
+    try {
+      return _composedFetch(cappingFetch)('', {})
+    } catch (err) {
+      return ResultErr(isError(err) ? err : undefined)
+    }
   }
 
-  const _create = (create: DependFetch) => {
+  const _create = (create: DependResultFetch) => {
     return withFetch(fetch, create)
   }
 

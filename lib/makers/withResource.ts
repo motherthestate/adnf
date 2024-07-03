@@ -1,11 +1,11 @@
-import { Fetch } from '../types'
+import { ResultFetch } from '../types'
 import { withFetch } from './withFetch'
 
 /**
  * withResource
  */
 
-export const withResource = <F extends Fetch>(
+export const withResource = <F extends ResultFetch>(
   fetch: F,
   resource: string | ((resource: string) => string)
 ) => {
@@ -18,6 +18,6 @@ export const withResource = <F extends Fetch>(
  * withBase
  */
 
-export const withBase = <F extends Fetch>(fetch: F, base: string) => {
+export const withBase = <F extends ResultFetch>(fetch: F, base: string) => {
   return withResource(fetch, resource => base + resource)
 }

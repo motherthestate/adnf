@@ -1,11 +1,11 @@
-import { Fetch } from '../types'
+import { ResultFetch } from '../types'
 import { withOptions } from './withOptions'
 
 /**
  * withMethods
  */
 
-export const withMethods = <F extends Fetch>(fetch: F) => {
+export const withMethods = <F extends ResultFetch>(fetch: F) => {
   const method = (method: string) => withOptions(fetch, { method })
 
   return {

@@ -49,13 +49,13 @@ export type ResultFetch = <V = unknown, E = unknown>(
 
 export type InferResult<F extends Fetch> = F extends Fetch<infer F> ? F : never
 
-export type Dependent<F extends Fetch> = F & {
-  _create: (create: DependFetch) => Dependent<F>
-  _composedFetch: DependFetch
-  _initFetch: Fetch
+export type Dependent<F extends ResultFetch> = F & {
+  _create: (create: DependResultFetch) => Dependent<F>
+  _composedFetch: DependResultFetch
+  _initFetch: ResultFetch
 }
 
-export type DependFetch = (fetch: Fetch) => Fetch
+export type DependResultFetch = (fetch: ResultFetch) => ResultFetch
 
 /**
  * Fetch declarations

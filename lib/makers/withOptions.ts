@@ -1,8 +1,8 @@
 import { mergeOptions } from '../helpers/utils'
-import { Fetch, FetchOptions } from '../types'
+import { FetchOptions, ResultFetch } from '../types'
 import { withFetch } from './withFetch'
 
-export const withOptions = <F extends Fetch>(
+export const withOptions = <F extends ResultFetch>(
   fetch: F,
   options: FetchOptions | ((options?: FetchOptions) => FetchOptions)
 ) => {

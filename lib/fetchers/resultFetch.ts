@@ -1,6 +1,12 @@
 import { Result, isError } from '../result'
 import { FetchErr, FetchErrResponse, FetchOptions, FetchSuccess, ResultFetch } from '../types'
-import { followSignal, isFormData, respectParams, toFormData } from '../helpers/utils'
+import {
+  flattenResource,
+  followSignal,
+  isFormData,
+  params as respectParams,
+  toFormData,
+} from '../helpers/utils'
 
 /**
  * ResultFetch
@@ -25,6 +31,8 @@ export const resultFetch: ResultFetch = async (resource, options) => {
     unwrap,
     ...fetchOptions
   } = options ?? ({} as FetchOptions)
+
+  resource = flattenResource(resource)
 
   try {
     /**
@@ -184,7 +192,6 @@ const ResultSuccess = <V = unknown>(response: Response, value: V): FetchSuccess<
     aborted: false,
     timeout: false,
     resolved: true,
-    declarationError: false,
     response,
   } as const)
 }
@@ -199,7 +206,6 @@ const ResultErrResponse = <E = unknown>(
     aborted: false,
     timeout: false,
     resolved: true,
-    declarationError: false,
     ...props,
     response,
   } as const)
@@ -214,7 +220,6 @@ export const ResultErr = (error?: unknown, props: Partial<FetchErr> = {}): Fetch
     aborted: false,
     timeout: false,
     resolved: false,
-    declarationError: false,
     ...props,
     response: undefined,
   } as const)

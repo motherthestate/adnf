@@ -1,4 +1,5 @@
-import { ResultFetch } from '../types'
+import { flattenResource } from '../helpers/utils'
+import { Resource, ResultFetch } from '../types'
 import { withFetch } from './withFetch'
 
 /**
@@ -7,10 +8,14 @@ import { withFetch } from './withFetch'
 
 export const withResource = <F extends ResultFetch>(
   fetch: F,
-  resource: string | ((resource: string) => string)
+  resource: Resource | ((resource: Resource) => string)
 ) => {
   return withFetch(fetch, fetch => (res, options) => {
-    return fetch(typeof resource === 'function' ? resource(res) : res + resource, options)
+    res = flattenResource(res)
+    return fetch(
+      typeof resource === 'function' ? resource(res) : res + flattenResource(resource),
+      options
+    )
   })
 }
 

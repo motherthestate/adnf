@@ -35,7 +35,7 @@
     "eslint": "^8.45.0",
     "postcss": "^8.4.28",
     "swr": "^2.2.5",
-    "typescript": "^5.2.2",
+    "typescript": "^5.5.3",
     "vite": "^4.4.5",
     "vite-plugin-dts": "^3.5.2",
     "vite-plugin-resolve": "^2.4.1"

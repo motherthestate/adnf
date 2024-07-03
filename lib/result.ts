@@ -3,6 +3,7 @@ import { assert } from './helpers/utils'
 const Success = <V>(value: V) => {
   return {
     value,
+    data: value,
     failed: false,
     success: true,
     type: undefined,
@@ -21,6 +22,7 @@ export const Result = Object.assign(Success, {
     const log = () => void console.error({ type, error, message: error?.message })
     return {
       value: undefined,
+      data: type,
       type,
       errorType: type,
       error,
@@ -57,6 +59,7 @@ export const isError = (v: any): v is Error => v instanceof Error
 
 export type Success<V> = {
   value: V
+  data: V
   type: undefined
   errorType: undefined
   error: undefined
@@ -70,6 +73,7 @@ export type Success<V> = {
 
 export type Err<T> = {
   value: undefined
+  data: T
   type: T
   failed: true
   errorType: T

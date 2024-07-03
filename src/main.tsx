@@ -1,21 +1,15 @@
-import { debugFetch, withDeclarations, withOptions } from '../lib'
+// import { debugFetch, params, withBase, withDeclarations, withOptions } from '../lib'
 
-const fetch = withOptions(debugFetch, () => {
-  return {}
-})
+// const fetch = withOptions(withBase(debugFetch, '/api'), {})
 
-const declare = withDeclarations(fetch)
+// const declare = withDeclarations(fetch)
 
-const signIn = () => {
-  return declare<{}, 'Unauthorized', { email: string; password: string }>('/user', args => {
-    return { params: args }
-  })
-}
+// const id = 'a'
 
-const main = async () => {
-  const result = await signIn().fetch({ email: 'max@101.lu', password: 'pass' })
-
-  console.log(result)
-}
-
-main()
+// console.log(
+//   declare('/user', { params: { id } }).key, // /user?id=a
+//   declare('/user', () => ({ params: { id } })).key, // /user
+//   declare(params('/user', { id })).key, // /user?id=a
+//   declare(`/user/${id}`).key, // /user/a
+//   declare(['/user', id]).key // /user/a
+// )

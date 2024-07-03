@@ -1,8 +1,7 @@
-import stableHash from 'stable-hash'
-import { isMutateMethod, mergeOptions } from '../helpers/utils'
-import { DeclareFetch, FetchOptions } from '../types'
 import { ResultErr } from '../fetchers/resultFetch'
+import { flattenResource, mergeOptions, params } from '../helpers/utils'
 import { tcResult } from '../result'
+import { DeclareFetch, FetchOptions } from '../types'
 
 /**
  * withDeclarations
@@ -10,7 +9,7 @@ import { tcResult } from '../result'
 
 export const withDeclarations: DeclareFetch = fetch => {
   return (resource, options) => {
-    const passingArgs = typeof options === 'function'
+    resource = flattenResource(resource)
     const key = hashFetch(resource, typeof options === 'function' ? {} : options)
 
     const prepFetch = (args: any, prepOptions?: FetchOptions) => {
@@ -19,18 +18,11 @@ export const withDeclarations: DeclareFetch = fetch => {
       )
 
       if (optionsResult.failed) {
-        return ResultErr(optionsResult.error, { declarationError: true })
+        return ResultErr(optionsResult.error)
       }
 
       const opts = optionsResult.value
-      const mergedOptions = mergeOptions(opts, {
-        key,
-        method: passingArgs
-          ? opts?.method && isMutateMethod(opts.method)
-            ? opts.method
-            : 'post'
-          : options?.method,
-      })
+      const mergedOptions = mergeOptions(opts, { key })
 
       return fetch(resource, mergeOptions(mergedOptions, prepOptions))
     }
@@ -44,8 +36,5 @@ export const withDeclarations: DeclareFetch = fetch => {
 }
 
 const hashFetch = (resource: string, options?: FetchOptions): string => {
-  const resourceWithParams = [resource, { params: options?.params ?? {} }]
-  const key = stableHash(resourceWithParams)
-
-  return key
+  return params(resource, options?.params ?? {})
 }

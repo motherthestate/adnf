@@ -1,4 +1,5 @@
 import { ResultErr } from '../fetchers/resultFetch'
+import { flattenResource } from '../helpers/utils'
 import { isError } from '../result'
 import { DependResultFetch, Dependent, ResultFetch } from '../types'
 
@@ -21,6 +22,7 @@ export const withFetch = <F extends ResultFetch>(
 
   const fetch: ResultFetch = async (path, opts) => {
     const cappingFetch: ResultFetch = (resource, options) => {
+      resource = flattenResource(resource)
       return _initFetch(resource + path, { ...options, ...opts })
     }
 

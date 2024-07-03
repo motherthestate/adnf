@@ -7,8 +7,10 @@ import { Err, Success } from './result'
 type PromiseWithError<V = unknown, E = never> = Promise<V> & { __error?: E }
 type PromiseError<P extends PromiseWithError> = P extends { __error?: infer E } ? E : never
 
+export type Resource = string | string[]
+
 export type Fetch<V = unknown, E = unknown> = (
-  resource: string,
+  resource: Resource,
   options?: FetchOptions
 ) => PromiseWithError<V, E>
 
@@ -41,7 +43,7 @@ export type FetchErrResponse<ErrType = unknown> = Err<ErrType | null> & {
 export type FetchResult<V = unknown, E = unknown> = FetchSuccess<V> | FetchErrResponse<E> | FetchErr
 
 export type ResultFetch = <V = unknown, E = unknown>(
-  resource: string,
+  resource: Resource,
   options?: FetchOptions
 ) => Promise<FetchResult<V, E>>
 
@@ -59,16 +61,16 @@ export type DependResultFetch = (fetch: ResultFetch) => ResultFetch
  * Fetch declarations
  */
 
-export type DeclareFetch = <F extends Fetch>(fetch: F) => Declare<F>
+export type DeclareFetch = <F extends ResultFetch>(fetch: F) => Declare<F>
 
-export type Declare<F extends Fetch> = <V = unknown, E = unknown, A = void>(
-  resource: string,
+type Declare<F extends Fetch> = <V = unknown, E = unknown, A = void>(
+  resource: Resource,
   options?: FetchOptions | ((args: A) => FetchOptions)
 ) => InferResult<F> extends FetchResult
   ? Declaration<FetchResult<V, E>, never, A>
   : Declaration<V, null | E, A>
 
-export type Declaration<Result, E = never, A = void> = {
+type Declaration<Result, E = never, A = void> = {
   fetch: PreparedFetch<Result, E, A>
   key: string
 }

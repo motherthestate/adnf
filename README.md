@@ -17,7 +17,7 @@
       - [`withFetch`](#withfetch)
     - [Helpers](#helpers)
       - [`createAbortGroup`](#createabortgroup)
-      - [`respectParams`](#respectparams)
+      - [`params`](#params)
     - [Recipes](#recipes)
     - [Resources](#resources)
       - [Fetch dependency](#fetch-dependency)
@@ -183,14 +183,38 @@ const auth = withOptions(noCacheFetch, options => ({
 Declares fetches instead of running them immediately. Helps with prepared fetches, creating services and generating an identifier hash `key`.
 
 ```tsx
+import { fetch, withDeclarations, params } from 'adnf'
+
 const declare = withDeclarations(fetch)
 
-const fetchUser = id => declare('/user', { params: { id } })
+// Declare GET fetch
 
-const declaration = fetchUser('a')
+const getUser = (id: string) => declare<{}, 'Unauthorized'>('/user', { params: { id } })
 
-declaration.key // "@"/user",#params:#id:"a",,,"
+const declaration = getUser('a')
+
+declaration.key // /user?id=a
 declaration.fetch() // run fetch as usual
+
+declare('/user', { params: { id } }).key // /user?id=a
+declare('/user', () => ({ params: { id } })).key // /user
+declare(params('/user', { id })).key // /user?id=a
+declare(`/user/${id}`).key // /user/a
+declare(['/user', id]).key // /user/a
+
+// Declare mutative fetch
+
+import { params } from 'adnf'
+
+const editFlower = (id: string) =>
+  declare<{}, 'Unauthorized', Partial<Flower>>(params('/flower', { id }), flower => ({
+    method: 'put',
+    data: flower,
+  }))
+
+const declaration = editFlower('tulip')
+
+declaration.key // /flower?id=tulip
 ```
 
 For mutations where some arguments should not be part of the cache key, declare can be provided a function that will build options after the key was generated. Note that this will force your fetch to be a mutate method i.e. `post`, `put`, `delete` or `patch`.
@@ -233,45 +257,22 @@ fetch.post('/upload', { abortPrevious: true, group }) // Success
 group.cancel()
 ```
 
-#### `respectParams`
+#### `params`
 
 Merge/replace search params to resource or complete URL. Will respect provided format.
 
-`respectParams(path: string, params, replace: boolean)`
+`params(path: string, params, replace: boolean)`
 
 ```ts
-respectParams('/user', { id: 'a' })
+params('/user', { id: 'a' })
 // /user?id=a
-respectParams('https://github.com/user?id=a&for=b', { id: 'b' })
+params('https://github.com/user?id=a&for=b', { id: 'b' })
 // https://github.com/user?id=b&for=b
-respectParams('https://github.com/user?id=a&for=b', { id: 'b' }, true)
+params('https://github.com/user?id=a&for=b', { id: 'b' }, true)
 // https://github.com/user?id=b
 ```
 
 ### Recipes
-
-#### Last wins and First wins
-
-```tsx
-import { fetch, createAbortGroup, ResultErr } from 'adnf'
-
-// LWW
-const group = createAbortGroup()
-
-fetch('/a', { group, abortPrevious: true }) // Err
-fetch('/b', { group, abortPrevious: true }) // Success | ErrResponse
-
-// FWW
-const group = createAbortGroup()
-
-const patientFetch = resource => {
-  if (group.controllers.length) return ResultErr({ aborted: true })
-  group.fetch(resource, { group })
-}
-
-patientFetch('/a') // will resolve
-patientFetch('/b') // will not resolve if "/a" fetch did not finish
-```
 
 #### Fetch logger
 

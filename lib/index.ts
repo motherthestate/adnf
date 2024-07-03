@@ -19,7 +19,7 @@ export { withDeclarations } from './makers/withDeclarations'
 export { createAbortGroup } from './helpers/createAbortGroup'
 export { unwrap } from './helpers/unwrap'
 export { swrResult } from './helpers/swr'
-export { mergeOptions, respectParams } from './helpers/utils'
+export { mergeOptions, params, params as respectParams } from './helpers/utils'
 export type { SWRError } from './helpers/swr'
 
 /**

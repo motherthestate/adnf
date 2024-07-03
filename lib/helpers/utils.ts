@@ -93,30 +93,33 @@ export const mergeOptions = (
  * Append search params to resource or complete URL.
  *
  * ```ts
- * respectParams('/user', { id: 'a' })
+ * params('/user', { id: 'a' })
  * // /user?id=a
- * respectParams('https://github.com/user', { id: 'a' })
+ * params('https://github.com/user', { id: 'a' })
  * // https://github.com/user?id=a
- * respectParams('https://github.com/user?id=a&for=b', { id: 'b' })
+ * params('https://github.com/user?id=a&for=b', { id: 'b' })
  * // https://github.com/user?id=b&for=b
  * ```
  */
 
-export const respectParams = (path: string, params: Record<string, any>, replace = false) => {
+export const params = (path: string, params: Record<string, any>, replace = false) => {
   const url = new URL(path, 'https://developer.mozilla.org')
 
   // get existing params from resource
   const resourceParams = Object.fromEntries(url.searchParams)
   const newParams = Object.fromEntries(new URLSearchParams(params))
-
-  const mergedParams = new URLSearchParams(
-    replace ? newParams : { ...resourceParams, ...newParams }
-  )
-  const searchParams = mergedParams.toString()
+  const mergedParams = replace ? newParams : { ...resourceParams, ...newParams }
+  const orderedParams = Object.entries(mergedParams).toSorted(([a], [b]) => a.localeCompare(b))
+  const mergedSearchParams = new URLSearchParams(orderedParams)
+  const searchParams = mergedSearchParams.toString()
   const prefixed = searchParams ? `?${searchParams}` : ''
 
   if (isValidURL(path)) return `${url.origin}${url.pathname}${prefixed}`
   return `${url.pathname}${prefixed}`
+}
+
+export const flattenResource = (resource: string | string[]) => {
+  return (Array.isArray(resource) ? resource : [resource]).join('/')
 }
 
 /**

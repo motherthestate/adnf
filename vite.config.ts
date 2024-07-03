@@ -5,6 +5,7 @@ import resolvePlugin from 'vite-plugin-resolve'
 
 export default defineConfig(({ mode }) => {
   return {
+    root: null,
     plugins:
       mode === 'development'
         ? [dts({ rollupTypes: true })]

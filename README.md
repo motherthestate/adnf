@@ -16,7 +16,6 @@
       - [`🐛 withDeclarations`](#withdeclarations)
       - [`withFetch`](#withfetch)
     - [Helpers](#helpers)
-      - [`unwrap` and `swr`](#unwrap-and-swr)
       - [`createAbortGroup`](#createabortgroup)
       - [`respectParams`](#respectparams)
     - [Recipes](#recipes)
@@ -211,19 +210,6 @@ const newFetch = withFetch(fetch, fetch => (resource, options) => fetch(resource
 ```
 
 ### [Helpers](https://github.com/weltmx/adnf/tree/main/lib/helpers)
-
-#### `unwrap`
-
-If you’re working with a library that expects errors to be thrown, use unwrap. Unwrapping fetch does not restore the Fetch API 1:1, primarily differences in behavior due to ResultFetch’s strict option.
-
-```tsx
-import { fetch as resultFetch, unwrap } from "adnf"
-
-const fetch = unwrap(resultFetch)
-
-const result = await = resultFetch<User>("/me") // FetchResult<User, unkown>
-const user = await = fetch<User>("/me") // User
-```
 
 #### `createAbortGroup`
 

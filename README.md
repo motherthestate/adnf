@@ -50,7 +50,7 @@ Additionally `FetchResult` extends a rust inspired `Result` wrapper proving a us
 ```tsx
 const result = await fetch<Flower | null, 'NoFlower'>('/flower') // FetchResult<Flower[], "NoFlower">
 
-result.error // "NoFlower" | null | undefined
+result.error // The fetch response error. "NoFlower" | null | undefined
 result.aborted // fetch was aborted
 result.timeout // fetch was aborted due to a timeout
 result.resolved // fetch was able to resolve to a request

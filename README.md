@@ -184,7 +184,7 @@ const auth = withOptions(noCacheFetch, options => ({
 
 #### `withDeclarations`
 
-Declares fetches instead of running them immediately. Helps with prepared fetches, creating services and generating an identifier hash `key`.
+Declares fetches instead of running them immediately. Helps with prepared fetches, creating services and generating an cache identifier `key`.
 
 ```tsx
 import { fetch, withDeclarations, params } from 'adnf'

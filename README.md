@@ -50,7 +50,7 @@ Additionally `FetchResult` extends a rust inspired `Result` wrapper proving a us
 ```tsx
 const result = await fetch<Flower | null, 'NoFlower'>('/flower') // FetchResult<Flower[], "NoFlower">
 
-// Unwrap your value:
+// Unwrap your value
 result.unwrap() // (throws Error) | Flower | null
 result.notNullable() // (throws Error) | Flower
 

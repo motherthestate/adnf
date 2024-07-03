@@ -17,21 +17,20 @@ const Success = <V>(value: V) => {
 
 export const Result = Object.assign(Success, {
   Success,
-  Err: <ET>(type: ET, error?: Error) => {
+  Err: <ET>(type: ET, error: Error = new Error('Result.Err: No error provided')) => {
     const log = () => void console.error({ type, error, message: error?.message })
     return {
       value: undefined,
       type,
       errorType: type,
       error,
-      message: error?.message,
+      message: error.message,
       failed: true,
       success: false,
       log,
       unwrap: () => {
-        if (isError(error)) throw error
         log() // log error, otherwise type will be missing for debugging
-        throw new Error('Result.error: thrown error is not instance of Error')
+        throw error
       },
       notNullable: () => {
         throw new Error('Result.distinct: Nullable value or error')
@@ -74,8 +73,8 @@ export type Err<T> = {
   type: T
   failed: true
   errorType: T
-  error: Error | undefined
-  message: string | undefined
+  error: Error
+  message: string
   success: false
   unwrap: () => never
   log: () => void

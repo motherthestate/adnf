@@ -160,19 +160,19 @@ export const resultFetch: ResultFetch = async (resource, options) => {
         )
       }
 
-      return ResultErrResponse(response, errorType)
+      return ResultErrResponse(response, errorType, new Error('Fetch response not ok'))
     } catch (err) {
       // No fetch response error
       const abortDueToTimeout =
         abortController.signal.aborted && abortController.signal.reason === TimeoutReason
 
-      return ResultErr(isError(err) ? err : undefined, {
+      return ResultErr(err, {
         aborted: abortController.signal.aborted,
         timeout: abortDueToTimeout,
       })
     }
   } catch (err) {
-    return ResultErr(isError(err) ? err : undefined, {
+    return ResultErr(err, {
       aborted: false,
       timeout: false,
     })
@@ -192,7 +192,7 @@ const ResultSuccess = <V = unknown>(response: Response, value: V): FetchSuccess<
 const ResultErrResponse = <E = unknown>(
   response: Response,
   type: E,
-  error?: Error,
+  error: Error,
   props: Partial<FetchErrResponse> = {}
 ): FetchErrResponse<E> => {
   return Object.assign(Result.Err(type, error), {
@@ -205,8 +205,12 @@ const ResultErrResponse = <E = unknown>(
   } as const)
 }
 
-export const ResultErr = (error?: Error, props: Partial<FetchErr> = {}): FetchErr => {
-  return Object.assign(Result.Err(null, error), {
+export const ResultErr = (error?: unknown, props: Partial<FetchErr> = {}): FetchErr => {
+  const err = isError(error)
+    ? error
+    : new Error('ResultErr: Provided error is on instance of Error()')
+
+  return Object.assign(Result.Err(null, err), {
     aborted: false,
     timeout: false,
     resolved: false,

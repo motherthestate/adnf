@@ -71,8 +71,8 @@ if (result.failed) {
   result.type // alias for errorType
   result.errorType // "NoFlower" | null | undefined
 
-  result.error // Error
-  result.message // string | undefined
+  result.error // the thrown Error object
+  result.message // string
 }
 
 result.aborted // fetch was aborted

@@ -50,30 +50,34 @@ Additionally `FetchResult` extends a rust inspired `Result` wrapper proving a us
 ```tsx
 const result = await fetch<Flower | null, 'NoFlower'>('/flower') // FetchResult<Flower[], "NoFlower">
 
-result.errorType // "NoFlower" | null | undefined
-result.type // alias for errorType
-
-result.aborted // fetch was aborted
-result.timeout // fetch was aborted due to a timeout
-result.resolved // fetch was able to resolve to a request
-
 // Unwrap your value:
 result.unwrap() // (throws Error) | Flower | null
 result.notNullable() // (throws Error) | Flower
-result.log() // logs value or error if present
 
-// Or handle your cases:
+// Response data
+result.data // Flower | null | 'NoFlower'
+
+// Success data
 if (result.success) {
   result // Success<Flower[]>
   result.value // Flower[]
 }
 
+// Error cases
 if (result.failed) {
   if (result.response) return result // ErrResponse
-  result // Err
+
+  // Error response
+  result.type // alias for errorType
+  result.errorType // "NoFlower" | null | undefined
+
   result.error // Error
   result.message // string | undefined
 }
+
+result.aborted // fetch was aborted
+result.timeout // fetch was aborted due to a timeout
+result.resolved // fetch was able to resolve to a request
 ```
 
 ## Extend fetchers

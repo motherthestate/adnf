@@ -66,7 +66,7 @@ if (result.ok) {
 if (result.failed) {
   if (result.response) {
     result // Except<'NoFlower'>
-    result.except // "NoFlower" | null
+    result.except // "NoFlower"
     return
   }
 

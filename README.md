@@ -31,7 +31,7 @@ const result = await fetch<User>('/me') // Result<User, unknown>
 
 result.user // undefined | User
 
-if (result.success) {
+if (result.ok) {
   result.user satisfies User
 }
 ```
@@ -40,9 +40,9 @@ if (result.success) {
 
 The `fetch` function has 3 result types. The `FetchResult<V, E>` type describes all three result types:
 
-- `Success<V>`: Fetch was successful
-- `ErrResponse<E>`: Fetch returned response but with error status code
-- `Err`: No response. Strict error thrown, network error, fetch aborted
+- `Ok<V>`: Fetch was successful
+- `Except<E>`: Fetch returned response but with error status code
+- `NoResponse`: Strict error thrown, network error, fetch aborted
 
 Additionally `FetchResult` extends a rust inspired `Result` wrapper proving a useful API.
 
@@ -53,23 +53,24 @@ const result = await fetch<Flower | null, 'NoFlower'>('/flower') // FetchResult<
 result.unwrap() // (throws Error) | Flower | null
 result.notNullable() // (throws Error) | Flower
 
-// Response data
-result.data // Flower | null | 'NoFlower'
+// Response data, irregardless of result type
+result.data // Flower | null | 'NoFlower' | undefined
 
 // Success data
-if (result.success) {
-  result // Success<Flower[]>
+if (result.ok) {
+  result // Ok<Flower[]>
   result.value // Flower[]
 }
 
 // Error cases
 if (result.failed) {
-  if (result.response) return result // ErrResponse
+  if (result.response) {
+    result // Except<'NoFlower'>
+    result.except // "NoFlower" | null
+    return
+  }
 
-  // Error response
-  result.type // alias for errorType
-  result.errorType // "NoFlower" | null | undefined
-
+  result // NoResponse
   result.error // the thrown Error object
   result.message // string
 }
@@ -116,7 +117,7 @@ const result = fetch(
   options: RequestInit & {
     fetch // fetch implementation, default: window.fetch
     strict: boolean // default: true
-    timeout: number // timeout in ms. returns "Err" with timeout set to true
+    timeout: number // timeout in ms. returns "NoResponse" with timeout set to true
     group: AbortControllerGroup
     abortPrevious: boolean // aborts all previous fetches in provided AbortControllerGroup
     data: object // json body data
@@ -252,9 +253,9 @@ import { createAbortGroup } from 'adnf'
 const group = createAbortGroup()
 
 // use abortPrevious for grouped fetched before fetch
-fetch.post('/upload', { abortPrevious: true, group }) // Err
-fetch.post('/upload', { abortPrevious: true, group }) // Err
-fetch.post('/upload', { abortPrevious: true, group }) // Success
+fetch.post('/upload', { abortPrevious: true, group }) // NoResponse
+fetch.post('/upload', { abortPrevious: true, group }) // NoResponse
+fetch.post('/upload', { abortPrevious: true, group }) // Ok
 
 // or manually
 group.cancel()

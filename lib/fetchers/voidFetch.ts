@@ -1,8 +1,8 @@
-import { Result } from '../result'
+import { Result } from '../helpers/result'
 import { Fetch } from '../types'
 
 export const voidFetch = (async (resource, options) => {
-  return Object.assign(Result({}), {
+  return Object.assign(Result.Ok({}), {
     aborted: false,
     timeout: false,
     response: new Response(),

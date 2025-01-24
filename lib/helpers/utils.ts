@@ -1,14 +1,15 @@
-import { FetchOptions, FormDataRecord } from '../types'
+import { FetchOptions, FormDataEntries } from '../types'
 
 export const isFile = (value: any): value is File => 'File' in window && value instanceof File
 export const isFormData = (value: unknown): value is FormData => value instanceof FormData
 
-export const toFormData = (entries: FormDataRecord) => {
+export const entriesToFormData = (entries: FormDataEntries): FormData => {
   const form = new FormData()
 
   Object.entries(entries).forEach(([key, value]) => {
     if (value === undefined) return
     if (value === null) return form.set(key, '')
+
     if (typeof value === 'string' || typeof value === 'number') return form.set(key, `${value}`)
 
     // single file
@@ -114,6 +115,7 @@ export const params = (path: string, params: Record<string, any>, replace = fals
   const searchParams = mergedSearchParams.toString()
   const prefixed = searchParams ? `?${searchParams}` : ''
 
+  if (!path || path.startsWith('?')) return prefixed
   if (isValidURL(path)) return `${url.origin}${url.pathname}${prefixed}`
   return `${url.pathname}${prefixed}`
 }

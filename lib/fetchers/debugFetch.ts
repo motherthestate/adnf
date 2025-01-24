@@ -1,4 +1,4 @@
-import { Result } from '../result'
+import { Result } from '../helpers/result'
 import { ResultFetch } from '../types'
 
 export const debugFetch = (async (resource, options) => {
@@ -8,7 +8,7 @@ export const debugFetch = (async (resource, options) => {
     resource,
     options
   )
-  return Object.assign(Result({ resource, options }), {
+  return Object.assign(Result.Ok({ resource, options }), {
     aborted: false,
     timeout: false,
     response: new Response(),

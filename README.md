@@ -2,25 +2,25 @@
 
 **A Dog Named Fetch** - A strict, tiny typescript fetch wrapper.
 
-  - [Overview](#overview)
-  - [The FetchResult](#the-fetchresult)
-  - [Extend fetchers](#extend-fetchers)
-  - [Reference](#reference)
-    - [Fetchers](#fetchers)
-      - [`fetch`](#fetch)
-    - [Makers](#makers)
-      - [`withMethods`](#withmethods)
-      - [`withResource` & `withBase`](#withresource-withbase)
-      - [`withOptions`](#withoptions)
-      - [`🐛 withDeclarations`](#withdeclarations)
-      - [`withFetch`](#withfetch)
-    - [Helpers](#helpers)
-      - [`createAbortGroup`](#createabortgroup)
-      - [`params`](#params)
-    - [Recipes](#recipes)
-    - [Resources](#resources)
-      - [Fetch dependency](#fetch-dependency)
-      - [ADNF + SWR](#adnf-+-swr)
+- [Overview](#overview)
+- [The FetchResult](#the-fetchresult)
+- [Extend fetchers](#extend-fetchers)
+- [Reference](#reference)
+  - [Fetchers](#fetchers)
+    - [`fetch`](#fetch)
+  - [Makers](#makers)
+    - [`withMethods`](#withmethods)
+    - [`withResource` & `withBase`](#withresource-withbase)
+    - [`withOptions`](#withoptions)
+    - [`🐛 withDeclarations`](#withdeclarations)
+    - [`withMiddleware`](#withMiddleware)
+  - [Helpers](#helpers)
+    - [`createAbortGroup`](#createabortgroup)
+    - [`params`](#params)
+  - [Recipes](#recipes)
+  - [Resources](#resources)
+    - [Fetch dependency](#fetch-dependency)
+    - [ADNF + SWR](#adnf-+-swr)
 
 ## Overview
 
@@ -81,7 +81,7 @@ result.resolved // fetch was able to resolve to a request
 
 ## Extend fetchers
 
-You can use the maker functions `withOptions`, `withResource`, `withBase` and `withFetch` to sequentially extend a fetch.
+You can use the maker functions `withOptions`, `withResource`, `withBase` and `withMiddleware` to sequentially extend a fetch.
 
 ```tsx
 import { fetch, withBase } from 'adnf'
@@ -128,16 +128,6 @@ const result = fetch(
 
 
 result satisfies FetchResult
-```
-
-#### `debugFetch`
-
-A fetch function that logs fetches. Does not perform the fetch.
-
-```tsx
-import { debugFetch } from 'adnf'
-
-debugFetch('/user') // logs fetch to console
 ```
 
 ### [Makers](https://github.com/weltmx/adnf/tree/main/lib/makers)
@@ -232,12 +222,15 @@ declaration.key // "@"/user",#params,,"
 const declaration = fetchUser.fetch({ id: 'a' }) // fetch('/user', { method: "post", params: { id: 'a' }, ... })
 ```
 
-#### `withFetch`
+#### `withMiddleware`
 
 Create fetch creators that run sequentially when initiating a fetch. Used to create a fetch that is _dependent_ on the next fetch. Used internally to implement other makers. Read more about [fetch dependency below](#fetch-dependency).
 
 ```tsx
-const newFetch = withFetch(fetch, fetch => (resource, options) => fetch(resource, { ...options }))
+const newFetch = withMiddleware(
+  fetch,
+  fetch => (resource, options) => fetch(resource, { ...options })
+)
 ```
 
 ### [Helpers](https://github.com/weltmx/adnf/tree/main/lib/helpers)
@@ -292,10 +285,10 @@ const loggedFetch = useFetch(fetch, fetch => (resource, options) => {
 
 #### Fetch dependency
 
-Dependent fetches follow other fetches. Maker functions return a special fetch that maintains a specific order. When using `withFetch` the fetch provided in the creator is the **next** fetch. Your fetch creators are made "dependent" and run in sequence once you have initiated a fetch.
+Dependent fetches follow other fetches. Maker functions return a special fetch that maintains a specific order. When using `withMiddleware` the fetch provided in the creator is the **next** fetch. Your fetch creators are made "dependent" and run in sequence once you have initiated a fetch.
 
 ```tsx
-const a = withFetch(fetch, fetch => {
+const a = withMiddleware(fetch, fetch => {
   console.log('init: a')
   return (resource, options) => {
     console.log('fetch: a')
@@ -303,7 +296,7 @@ const a = withFetch(fetch, fetch => {
   }
 })
 
-const b = withFetch(a, fetch => {
+const b = withMiddleware(a, fetch => {
   console.log('init: b')
   return (resource, options) => {
     console.log('fetch: b')
@@ -311,7 +304,7 @@ const b = withFetch(a, fetch => {
   }
 })
 
-const c = withFetch(c, fetch => {
+const c = withMiddleware(c, fetch => {
   console.log('init: c')
   return (resource, options) => {
     console.log('fetch: c')

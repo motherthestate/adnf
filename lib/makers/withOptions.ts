@@ -1,13 +1,13 @@
 import { mergeOptions } from '../helpers/utils'
 import { FetchOptions, ResultFetch } from '../types'
-import { withFetch } from './withFetch'
+import { withMiddleware } from './withMiddleware'
 
 export const withOptions = <F extends ResultFetch>(
   fetch: F,
   options: FetchOptions | ((options?: FetchOptions) => FetchOptions)
 ) => {
-  return withFetch(fetch, next => (resource, opts) => {
+  return withMiddleware(fetch, nextFetch => (resource, opts) => {
     const nextOptions = typeof options === 'function' ? options(opts) : options
-    return next(resource, mergeOptions(opts, nextOptions))
+    return nextFetch(resource, mergeOptions(opts, nextOptions))
   })
 }

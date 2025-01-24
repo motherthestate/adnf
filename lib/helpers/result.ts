@@ -1,34 +1,32 @@
-import { assert } from './helpers/utils'
+import { assert } from './utils'
 
-const Success = <V>(value: V) => {
+const Ok = <V>(value: V) => {
   return {
+    ok: true,
     value,
     data: value,
+    except: undefined,
     failed: false,
-    success: true,
-    type: undefined,
-    errorType: undefined,
     error: undefined,
     message: undefined,
     unwrap: () => value,
     log: () => void console.log(value),
     notNullable: () => assert(value),
-  } as Success<V>
+  } as Ok<V>
 }
 
-export const Result = Object.assign(Success, {
-  Success,
-  Err: <ET>(type: ET, error: Error = new Error('Result.Err: No error provided')) => {
-    const log = () => void console.error({ type, error, message: error?.message })
+export const Result = Object.assign(Ok, {
+  Ok,
+  Except: <E>(except: E, error: Error = new Error('Result.Except: No error provided')) => {
+    const log = () => void console.error({ type: except, error, message: error?.message })
     return {
       value: undefined,
-      data: type,
-      type,
-      errorType: type,
+      except,
+      data: except,
       error,
       message: error.message,
       failed: true,
-      success: false,
+      ok: false,
       log,
       unwrap: () => {
         log() // log error, otherwise type will be missing for debugging
@@ -37,7 +35,7 @@ export const Result = Object.assign(Success, {
       notNullable: () => {
         throw new Error('Result.distinct: Nullable value or error')
       },
-    } as Err<ET>
+    } as Except<E>
   },
 })
 
@@ -47,9 +45,9 @@ export const Result = Object.assign(Success, {
 
 export const tcResult = <R>(tryFn: () => R) => {
   try {
-    return Result.Success(tryFn())
+    return Result.Ok(tryFn())
   } catch (err) {
-    return Result.Err(null, isError(err) ? err : undefined)
+    return Result.Except(null, isError(err) ? err : undefined)
   }
 }
 
@@ -57,32 +55,30 @@ export const isError = (v: any): v is Error => v instanceof Error
 
 // results
 
-export type Success<V> = {
-  value: V
+export type Ok<V> = {
   data: V
-  type: undefined
-  errorType: undefined
+  value: V
+  except: undefined
+  failed: false
   error: undefined
   message: undefined
-  failed: false
-  success: true
+  ok: true
   unwrap: () => V
   log: () => void
   notNullable: () => NonNullable<V>
 }
 
-export type Err<T> = {
+export type Except<E> = {
+  data: E
   value: undefined
-  data: T
-  type: T
+  except: E
   failed: true
-  errorType: T
   error: Error
   message: string
-  success: false
+  ok: false
   unwrap: () => never
   log: () => void
   notNullable: () => never
 }
 
-export type Result<V = unknown, E = unknown> = Success<V> | Err<E>
+export type Result<V = unknown, E = unknown> = Ok<V> | Except<E>

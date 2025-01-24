@@ -1,13 +1,16 @@
-import { Err, Success } from './result'
+import { Except, NoResponse, Ok } from './fetchers/resultFetch'
+import { Option } from '@mobily/ts-belt'
 
+export type XXX = Option<''>
 /**
  * Types
  */
 
 type PromiseWithError<V = unknown, E = never> = Promise<V> & { __error?: E }
-type PromiseError<P extends PromiseWithError> = P extends { __error?: infer E } ? E : never
 
 export type Resource = string | string[]
+
+export type WithKey<V> = V & { key: string }
 
 export type Fetch<V = unknown, E = unknown> = (
   resource: Resource,
@@ -19,35 +22,27 @@ export type PreparedFetch<V = unknown, E = unknown, A = unknown> = (
   options?: FetchOptions
 ) => PromiseWithError<V, E>
 
-export type FetchSuccess<V = unknown> = Success<V> & {
-  aborted: false
-  timeout: false
-  response: Response
-  resolved: true
-}
-
-export type FetchErr = Err<null> & {
-  aborted: boolean
-  timeout: boolean
-  response: undefined
-  resolved: false
-}
-
-export type FetchErrResponse<ErrType = unknown> = Err<ErrType | null> & {
-  aborted: false
-  timeout: false
-  response: Response
-  resolved: true
-}
-
-export type FetchResult<V = unknown, E = unknown> = FetchSuccess<V> | FetchErrResponse<E> | FetchErr
+export type FetchResult<V = unknown, E = unknown> = Ok<V> | Except<E> | NoResponse
 
 export type ResultFetch = <V = unknown, E = unknown>(
   resource: Resource,
   options?: FetchOptions
 ) => Promise<FetchResult<V, E>>
 
-export type InferResult<F extends Fetch> = F extends Fetch<infer F> ? F : never
+export type ResultFetchWithKey = <V = unknown, E = unknown>(
+  resource: Resource,
+  options?: FetchOptions
+) => WithKey<Promise<FetchResult<V, E>>>
+
+export type InferFetchResult<F extends Fetch> = F extends Fetch<infer F> ? F : never
+
+export type InferFetchValue<F> = F extends (...args: any) => Promise<FetchResult<infer V, any>>
+  ? V
+  : never
+
+export type InferFetchError<F> = F extends (...args: any) => Promise<FetchResult<any, infer E>>
+  ? E
+  : never
 
 export type Dependent<F extends ResultFetch> = F & {
   _create: (create: DependResultFetch) => Dependent<F>
@@ -63,17 +58,32 @@ export type DependResultFetch = (fetch: ResultFetch) => ResultFetch
 
 export type DeclareFetch = <F extends ResultFetch>(fetch: F) => Declare<F>
 
-type Declare<F extends Fetch> = <V = unknown, E = unknown, A = void>(
+export type Declare<F extends Fetch> = <V = unknown, E = unknown, A = void>(
   resource: Resource,
   options?: FetchOptions | ((args: A) => FetchOptions)
-) => InferResult<F> extends FetchResult
+) => InferFetchResult<F> extends FetchResult
   ? Declaration<FetchResult<V, E>, never, A>
   : Declaration<V, null | E, A>
 
-type Declaration<Result, E = never, A = void> = {
+export type Declaration<Result, E = never, A = void> = {
   fetch: PreparedFetch<Result, E, A>
   key: string
 }
+
+export type Infer<F> = F extends { fetch: (...args: any) => Promise<FetchResult<infer V, any>> }
+  ? V
+  : InferFetchValue<F>
+
+export type InferDeclaration<F> = F extends {
+  fetch: (args: infer A, ...rest: any) => Promise<FetchResult<infer V, infer E>>
+}
+  ? {
+      Data: V | E
+      Value: V
+      Except: E
+      Args: A
+    }
+  : never
 
 export type FetchResultDeclaration<V, E, A = void> = Declaration<FetchResult<V, E>, never, A>
 export type FetchDeclaration<V, E, A = void> = Declaration<V, E, A>
@@ -87,8 +97,8 @@ export type FetchOptions = RequestInit & {
   group?: AbortControllerGroup
   abortPrevious?: boolean
   data?: object
-  form?: FormData | FormDataRecord
-  files?: FormDataRecord
+  form?: FormData | FormDataEntries
+  files?: FormDataEntries
   params?: Record<string, any>
   parse?: (str: string) => object
   stringify?: (data: object) => string
@@ -98,7 +108,7 @@ export type FetchOptions = RequestInit & {
   key?: string
 }
 
-export type FormDataRecord = Record<string, string | Blob>
+export type FormDataEntries = Record<string, null | undefined | string | Blob | File>
 
 export type AbortControllerGroup = {
   controllers: Set<AbortController>

@@ -1,7 +1,7 @@
-import { ResultErr } from '../fetchers/resultFetch'
 import { flattenResource, mergeOptions, params } from '../helpers/utils'
-import { tcResult } from '../result'
+import { tcResult } from '../helpers/result'
 import { DeclareFetch, FetchOptions } from '../types'
+import { NoResponse } from '../fetchers/resultFetch'
 
 /**
  * withDeclarations
@@ -18,7 +18,7 @@ export const withDeclarations: DeclareFetch = fetch => {
       )
 
       if (optionsResult.failed) {
-        return ResultErr(optionsResult.error)
+        return NoResponse({ error: optionsResult.error })
       }
 
       const opts = optionsResult.value

@@ -1,18 +1,23 @@
-import { Result, isError } from '../result'
-import { FetchErr, FetchErrResponse, FetchOptions, FetchSuccess, ResultFetch } from '../types'
+import { Result, isError } from '../helpers/result'
+import { FetchOptions, ResultFetch, ResultFetchWithKey } from '../types'
 import {
   flattenResource,
   followSignal,
   isFormData,
   params as respectParams,
-  toFormData,
+  entriesToFormData,
 } from '../helpers/utils'
+import { Ok as ResultOk, Except as ResultExcept } from '../helpers/result'
 
 /**
  * ResultFetch
  */
 
-export const resultFetch: ResultFetch = async (resource, options) => {
+export const resultFetch: ResultFetchWithKey = (resource, options) => {
+  return Object.assign(resultFetchPromise(resource, options), { key: resource }) as any
+}
+
+const resultFetchPromise: ResultFetch = async (resource, options) => {
   const {
     strict = true,
     fetchSymbol = Symbol(),
@@ -107,12 +112,12 @@ export const resultFetch: ResultFetch = async (resource, options) => {
         throw new Error('Fetch provided multiple values for body. Pick data, files or form.')
       }
 
-      if (form) fetchOptions.body = isFormData(form) ? form : toFormData(form)
-      if (files) fetchOptions.body = toFormData(files)
+      if (form) fetchOptions.body = isFormData(form) ? form : entriesToFormData(form)
+      if (files) fetchOptions.body = entriesToFormData(files)
 
-      setHeaders({
-        'Content-Type': 'multipart/form-data',
-      })
+      // setHeaders({
+      //   'Content-Type': 'multipart/form-data',
+      // })
     }
 
     /**
@@ -138,91 +143,128 @@ export const resultFetch: ResultFetch = async (resource, options) => {
 
       const contentType = response.headers.get('content-type')
       const contentTypeSupportsJSON = contentType?.includes('application/json')
+      const expectStrictContent = response.status === 200
 
-      if (strict && !contentTypeSupportsJSON) {
-        return ResultErrResponse(
+      if (strict && expectStrictContent && !contentTypeSupportsJSON) {
+        return Except({
           response,
-          null,
-          new Error('Fetch response not json in: fetch(..., { strict: true })')
-        )
+          except: null,
+          error: new Error('Fetch response not json in: fetch(..., { strict: true })'),
+        })
       }
 
       /**
        * Parse response data
        */
 
-      const resultText = await response.text()
-      const resultData = contentTypeSupportsJSON ? parse(resultText) : resultText
+      const resultData = contentTypeSupportsJSON ? parse(await response.text()) : null
 
       if (responseOk) {
-        return ResultSuccess(response, resultData)
-      }
-
-      const errorType = resultData
-
-      if (strict && !errorType) {
-        return ResultErrResponse(
+        return Ok({
+          value: resultData,
           response,
-          null,
-          new Error('Fetch response error nullable in: fetch(..., { strict: true })')
-        )
+        })
       }
 
-      return ResultErrResponse(response, errorType, new Error('Fetch response not ok'))
-    } catch (err) {
+      const except = resultData
+
+      if (strict && !except) {
+        return Except({
+          response,
+          except: null,
+          error: new Error('Fetch response error nullable in: fetch(..., { strict: true })'),
+        })
+      }
+
+      return Except({
+        response,
+        except: except,
+        error: new Error('Fetch response Except'),
+      })
+    } catch (error) {
       // No fetch response error
       const abortDueToTimeout =
         abortController.signal.aborted && abortController.signal.reason === TimeoutReason
 
-      return ResultErr(err, {
+      return NoResponse({
+        error,
         aborted: abortController.signal.aborted,
         timeout: abortDueToTimeout,
       })
     }
-  } catch (err) {
-    return ResultErr(err, {
+  } catch (error) {
+    return NoResponse({
+      error,
       aborted: false,
       timeout: false,
     })
   }
 }
 
-const ResultSuccess = <V = unknown>(response: Response, value: V): FetchSuccess<V> => {
-  return Object.assign(Result(value), {
+/**
+ * Results
+ */
+
+export const Ok = <V = unknown>(initial: { response: Response; value: V }): Ok<V> => {
+  return Object.assign(Result.Ok(initial.value), {
     aborted: false,
     timeout: false,
     resolved: true,
-    response,
+    response: initial.response,
   } as const)
 }
 
-const ResultErrResponse = <E = unknown>(
-  response: Response,
-  type: E,
-  error: Error,
-  props: Partial<FetchErrResponse> = {}
-): FetchErrResponse<E> => {
-  return Object.assign(Result.Err(type, error), {
+export const Except = <E = unknown>(initial: {
+  response: Response
+  except: E
+  error: Error
+}): Except<E> => {
+  return Object.assign(Result.Except(initial.except, initial.error), {
     aborted: false,
     timeout: false,
     resolved: true,
-    ...props,
-    response,
+    response: initial.response,
   } as const)
 }
 
-export const ResultErr = (error?: unknown, props: Partial<FetchErr> = {}): FetchErr => {
-  const err = isError(error)
-    ? error
-    : new Error('ResultErr: Provided error is on instance of Error()')
+export const NoResponse = (
+  initial: { error?: unknown; aborted?: boolean; timeout?: boolean } = {}
+): NoResponse => {
+  const error = isError(initial.error)
+    ? initial.error
+    : new Error('NoResponse: Provided error is on instance of Error()')
 
-  return Object.assign(Result.Err(null, err), {
-    aborted: false,
-    timeout: false,
+  return Object.assign(Result.Except(null, error), {
+    aborted: initial.aborted ?? false,
+    timeout: initial.timeout ?? false,
     resolved: false,
-    ...props,
     response: undefined,
   } as const)
+}
+
+/**
+ * Result types
+ */
+
+export type Ok<V = unknown> = ResultOk<V> & {
+  aborted: false
+  timeout: false
+  response: Response
+  resolved: true
+}
+
+export type Except<ErrType = unknown> = ResultExcept<ErrType | null> & {
+  aborted: false
+  timeout: false
+  response: Response
+  resolved: true
+}
+
+export type NoResponse = ResultExcept<null> & {
+  aborted: boolean
+  timeout: boolean
+  response: undefined
+  resolved: false
 }
 
 /**

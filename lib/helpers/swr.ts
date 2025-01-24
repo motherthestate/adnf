@@ -1,25 +1,32 @@
-import { FetchResult } from '../types'
+// import { Except, NoResponse } from '../fetchers/resultFetch'
+// import { FetchResult } from '../types'
 
-/**
- * swr:
- * Transform FetchResult to compat SWR result
- */
+// /**
+//  * swr:
+//  * Transform FetchResult to compat SWR result
+//  */
 
-export const swrResult = <V, E>(result: FetchResult<V, E>) => {
-  if (result.failed) {
-    throw SWRError(result.error, result.response?.status)
-  }
-  return result.value
-}
+// export const swrResult = <V, E>(result: FetchResult<V, E>) => {
+//   if (result.failed) throw SWRError(result)
+//   return result.value
+// }
 
-const SWRError = <T>(type: T, status?: null | number): SWRError<T> => {
-  return Object.assign(new Error('ADNF: SWRError'), {
-    type,
-    status: status ?? null,
-  })
-}
+// export const SWRError = <E>(error: NoResponse | Except<E>): SWRError<E> => {
+//   return Object.assign(error.error, {
+//     result: error,
+//     except: error.except,
+//     status: error.response?.status ?? null,
+//   })
+// }
 
-export type SWRError<T> = Error & {
-  type: null | T
-  status: null | number
-}
+// export const isSWRError = <E>(error: Error): error is SWRError<E> => {
+//   return isError(error) && 'except' in error
+// }
+
+// export type SWRError<E> = Error & {
+//   result: NoResponse | Except<E>
+//   except: null | E
+//   status: null | number
+// }
+
+// export const isError = (v: any): v is Error => v instanceof Error

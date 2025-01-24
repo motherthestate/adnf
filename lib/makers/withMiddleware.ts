@@ -1,13 +1,13 @@
-import { ResultErr } from '../fetchers/resultFetch'
+import { NoResponse } from '../fetchers/resultFetch'
+import { isError } from '../helpers/result'
 import { flattenResource } from '../helpers/utils'
-import { isError } from '../result'
 import { DependResultFetch, Dependent, ResultFetch } from '../types'
 
 /**
- * withFetch
+ * withMiddleware
  */
 
-export const withFetch = <F extends ResultFetch>(
+export const withMiddleware = <F extends ResultFetch>(
   prevFetch: F | Dependent<F>,
   depend?: DependResultFetch
 ) => {
@@ -16,7 +16,10 @@ export const withFetch = <F extends ResultFetch>(
     '_composedFetch' in prevFetch ? prevFetch._composedFetch : (fetch: ResultFetch) => fetch
 
   const _composedFetch = (fetch: ResultFetch) => {
-    if (depend) return prevComposed(depend(fetch))
+    if (depend) {
+      return prevComposed(depend(fetch))
+    }
+
     return prevComposed(fetch)
   }
 
@@ -29,17 +32,17 @@ export const withFetch = <F extends ResultFetch>(
     try {
       return _composedFetch(cappingFetch)('', {})
     } catch (err) {
-      return ResultErr(isError(err) ? err : undefined)
+      return NoResponse({ error: isError(err) ? err : undefined })
     }
   }
 
-  const _create = (create: DependResultFetch) => {
-    return withFetch(fetch, create)
+  const _with = (create: DependResultFetch) => {
+    return withMiddleware(fetch, create)
   }
 
   return Object.assign(fetch as F, {
     _initFetch,
     _composedFetch,
-    _create,
+    with: _with,
   })
 }
